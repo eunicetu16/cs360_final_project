@@ -58,7 +58,7 @@
 					</section>
 
 				<!-- Four -->
-					<section class="spotlight style1 orient-right content-align-left image-position-center onscroll-image-fade-in">
+					<!-- <section class="spotlight style1 orient-right content-align-left image-position-center onscroll-image-fade-in">
 						<div class="content">
 							<h2>Pharetra etiam nulla</h2>
 							<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi id ante sed ex pharetra lacinia sit amet vel massa. Donec facilisis laoreet nulla eu bibendum. Donec ut ex risus. Fusce lorem lectus, pharetra pretium massa et, hendrerit vestibulum odio lorem ipsum dolor sit amet.</p>
@@ -69,7 +69,7 @@
 						<div class="image">
 							<img src="images/spotlight03.jpg" alt="" />
 						</div>
-					</section>
+					</section> -->
 					<!-- Five -->
 					<section class="wrapper style1 align-center">
 						<div class="inner">
@@ -285,35 +285,35 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js"></script>
   </head>
   <body>
-    <div id="chart-container"></div>
+    <div id="bar_chart"></div>
   </body>
   <script>
     // Set the dimensions and margins
-    const svgWidth = 900;
-    const svgHeight = 900;
-    const margin = {
+    const barWidth = 1000;
+    const barHeight = 1000;
+    const barmargin = {
       top: 80,
       right: 150,
       bottom: 70,
       left: 150,
     };
-    const width = svgWidth - margin.left - margin.right;
-    const height = svgHeight - margin.top - margin.bottom;
+    const barwidth = barWidth - barmargin.left - barmargin.right;
+    const barheight = barHeight - barmargin.top - barmargin.bottom;
 
     // Append the svg
-    const svg = d3
-      .select('#chart-container')
+    const bar = d3
+      .select('#bar_chart')
       .append('svg')
-      .attr('width', width + margin.left + margin.right)
-      .attr('height', height + margin.top + margin.bottom)
+      .attr('width', barwidth + barmargin.left + barmargin.right)
+      .attr('height', barheight + barmargin.top + barmargin.bottom)
       .append('g')
       .attr(
         'transform',
-        `translate(${margin.left},${margin.top})`,
+        `translate(${barmargin.left},${barmargin.top})`,
       );
 
     //Graph Title
-    svg
+    bar
       .append('text')
       .attr('x', -50)
       .attr('y', -50)
@@ -323,7 +323,7 @@
       .style('font-size', '25px');
 
     // Subtitle of graph
-    svg
+    bar
       .append('text')
       .attr('x', -50)
       .attr('y', -20)
@@ -335,9 +335,7 @@
       );
 
     // Load data
-    const csvUrl =
-      'https://gist.githubusercontent.com/eunicetu16/a350b68acbd765aff8876d20a41cad60/raw/b2c1779406d01f2979c3d76d37660a95c202be1f/2013_US_State_Statistics.csv';
-    d3.csv(csvUrl, function (d) {
+    d3.csv('https://gist.githubusercontent.com/eunicetu16/a350b68acbd765aff8876d20a41cad60/raw/b2c1779406d01f2979c3d76d37660a95c202be1f/2013_US_State_Statistics.csv', function (d) {
       return {
         state: d.State,
         change: +d['Change from Last Year'],
@@ -347,18 +345,18 @@
       const x = d3
         .scaleLinear()
         .domain([-2.1, 2.1])
-        .range([0, width]);
+        .range([0, barwidth]);
 
-      svg
+      bar
         .append('g')
-        .attr('transform', `translate(0, ${height})`)
+        .attr('transform', `translate(0, ${barheight})`)
         .call(d3.axisBottom(x));
 
       // Add X axis label
-      svg
+      bar
         .append('text')
-        .attr('x', width / 2 - 150)
-        .attr('y', height + 50)
+        .attr('x', barwidth / 2 - 150)
+        .attr('y', barheight + 50)
         .style('font-size', '20px')
         .text('Change From Last Year (2012 to 2013)');
 
@@ -366,18 +364,18 @@
       const y = d3
         .scaleBand()
         .domain(data.map((d) => d.state))
-        .range([0, height])
+        .range([0, barheight])
         .padding(0.1);
 
-      svg
+      bar
         .append('g')
         .attr('trandform', `translate(0, 0)`)
         .call(d3.axisLeft(y));
 
       // Add y axis label
-      svg
+      bar
         .append('text')
-        .attr('x', -height / 2 - 50)
+        .attr('x', -barheight / 2 - 50)
         .attr('y', -120)
         .text('State')
         .style('font-size', '20px')
@@ -393,10 +391,10 @@
       const barScale = d3
         .scaleLinear()
         .domain(d3.extent(data, (d) => d.change))
-        .range([0, width / 2]);
+        .range([0, barwidth / 2]);
 
       //Create Bars
-      svg
+      bar
         .selectAll('myRect')
         .data(data)
         .join('rect')
@@ -426,7 +424,7 @@
         .cells(5)
         .scale(colorScale);
 
-      svg
+      bar
         .append('g')
         .attr('class', 'legend')
         .attr('transform', 'translate(660, -50)')
@@ -435,7 +433,6 @@
   </script>
 </html>
 						
-
 				<!-- Footer -->
 					<footer class="wrapper style1 align-center">
 						<div class="inner">
