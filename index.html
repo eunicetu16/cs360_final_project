@@ -73,7 +73,7 @@
 					<!-- Five -->
 					<section class="wrapper style1 align-center">
 						<div class="inner">
-							<h2>Multi-Line Chart</h2>
+							<h2>Multi-Line Chart with Time-serires</h2>
 							<p>Multi-line chart to summarize the trend of homelessness in the United States for differnt variables from 2005-2013.</p>
 						</div>
 
@@ -318,7 +318,7 @@
       .attr('x', -50)
       .attr('y', -50)
       .text(
-        'Homelessness Population Percent Change Across different States',
+        'Homelessness Population Change Across different States',
       )
       .style('font-size', '25px');
 
@@ -355,10 +355,10 @@
       // Add X axis label
       bar
         .append('text')
-        .attr('x', barwidth / 2 - 150)
+        .attr('x', barwidth / 2 - 100)
         .attr('y', barheight + 50)
         .style('font-size', '20px')
-        .text('Change From Last Year (2012 to 2013)');
+        .text('Change From Last Year');
 
       // y axis
       const y = d3
