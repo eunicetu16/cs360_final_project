@@ -57,20 +57,7 @@
 						</div>
 					</section>
 
-				<!-- Four -->
-					<!-- <section class="spotlight style1 orient-right content-align-left image-position-center onscroll-image-fade-in">
-						<div class="content">
-							<h2>Pharetra etiam nulla</h2>
-							<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi id ante sed ex pharetra lacinia sit amet vel massa. Donec facilisis laoreet nulla eu bibendum. Donec ut ex risus. Fusce lorem lectus, pharetra pretium massa et, hendrerit vestibulum odio lorem ipsum dolor sit amet.</p>
-							<ul class="actions stacked">
-								<li><a href="#" class="button">Learn More</a></li>
-							</ul>
-						</div>
-						<div class="image">
-							<img src="images/spotlight03.jpg" alt="" />
-						</div>
-					</section> -->
-					<!-- Five -->
+					<!-- Four -->
 					<section class="wrapper style1 align-center">
 						<div class="inner">
 							<h2>Multi-Line Chart with Time-serires</h2>
@@ -168,7 +155,7 @@
       // Add X axis label
       svg
         .append('text')
-        .attr('x', width / 2 )
+        .attr('x', width / 2)
         .attr('y', height + 50)
         .style('font-size', '20px')
         .text('Year');
@@ -208,6 +195,12 @@
           '#ff7f00',
         ]); // from colorbrewer
 
+      var tooltip = d3
+        .select('body')
+        .append('div')
+        .attr('class', 'tooltip')
+        .style('opacity', 0);
+
       // Add lines
       svg
         .selectAll('.line')
@@ -243,6 +236,42 @@
         .attr('r', 4)
         .style('fill', function (d) {
           return colorScale(d.variable);
+        })
+        .on('mouseover', function (d, data) {
+          tooltip
+            .transition()
+            .duration(200)
+            .style('opacity', 0.85);
+
+          tooltip
+            .style('position', 'absolute')
+            .style('text-align', 'center')
+            .style('padding', '5px')
+            .style('font-size', '12.5px')
+            .style('background', 'rgb(231, 231, 229)')
+            .style('border', '0px')
+            .style('border-radius', '6px')
+            .style('pointer-events', 'none');
+
+          tooltip
+            .html(
+              'In ' +
+                data.year +
+                ' in ' +
+                data.variable +
+                '<br/>' +
+                'Homeless Population was ' +
+                data.homelessness +
+                '.',
+            )
+            .style('left', event.pageX + 10 + 'px')
+            .style('top', event.pageY - 30 + 'px');
+        })
+        .on('mouseout', function (d) {
+          tooltip
+            .transition()
+            .duration(500)
+            .style('opacity', 0);
         });
 
       //Add Legend
@@ -261,7 +290,18 @@
   </script>
 </html>
 
-				<!-- Six -->
+				<!-- Five -->
+        <section class="spotlight style1 orient-left content-align-left image-position-center onscroll-image-fade-in">
+            <div class="content">
+              <h2>“Don’t try to drive the homeless into place we find suitable. Help them survive in places they find suitable.”</h2>
+              <p> - Daniel Quinn</p>
+            </div>
+            <div class="image">
+              <img src="images/homeless_cartoon.jpg" alt="" />
+            </div>
+          </section>  
+
+          <!-- Six -->
 					<section class="wrapper style1 align-center">
 						<div class="inner">
 							<h2>Heatmap</h2>
@@ -279,33 +319,33 @@
   </body>
   <script>
     // Set the dimensions
-    const svgWidth = 1000;
-    const svgHeight = 500;
-    const margin = {
+    const HmapWidth = 1300;
+    const HmapHeight = 500;
+    const Hmapmargin = {
       top: 80,
       right: 20,
       bottom: 50,
       left: 100,
     };
-    const width = svgWidth - margin.left - margin.right;
-    const height = svgHeight - margin.top - margin.bottom;
+    const Hmapwidth = HmapWidth - Hmapmargin.left - Hmapmargin.right;
+    const Hmapheight = HmapHeight - Hmapmargin.top - Hmapmargin.bottom;
 
     // set up the svg
     const heatmap = d3
       .select('#heatmap')
       .append('svg')
-      .attr('width', width + margin.left + margin.right)
-      .attr('height', height + margin.top + margin.bottom)
+      .attr('width', Hmapwidth + Hmapmargin.left + Hmapmargin.right)
+      .attr('height', Hmapheight + Hmapmargin.top + Hmapmargin.bottom)
       .append('g')
       .attr(
         'transform',
-        `translate(${margin.left},${margin.top})`,
+        `translate(${Hmapmargin.left},${Hmapmargin.top})`,
       );
 
     //Read data and add tooltip
-    const csvUrl =
+    const heatmapUrl =
       'https://gist.githubusercontent.com/eunicetu16/a2d1d82e473376eb6f542fb42f814330/raw/a2bebada2d48db13a3cf3ad1a039e874b74780cd/Top_10_homeless_pop.csv';
-    d3.csv(csvUrl, function (d) {
+    d3.csv(heatmapUrl, function (d) {
       return {
         variable: d.Variable,
         state: d.State,
@@ -319,13 +359,13 @@
       // Set X scales and axis:
       const x = d3
         .scaleBand()
-        .range([0, width])
+        .range([0, Hmapwidth])
         .domain(data.map((d) => d.variable))
         .padding(0.01);
 
       heatmap
         .append('g')
-        .attr('transform', `translate(0, ${height})`)
+        .attr('transform', `translate(0, ${Hmapheight})`)
         .call(d3.axisBottom(x).tickSize(0))
         .select('.domain')
         .remove();
@@ -333,14 +373,14 @@
       // Add X axis label
       heatmap
         .append('text')
-        .attr('x', width / 2 - 50)
-        .attr('y', height + 40)
+        .attr('x', Hmapwidth / 2 - 50)
+        .attr('y', Hmapheight + 40)
         .style('font-size', '20px')
         .text('Year');
 
       const y = d3
         .scaleBand()
-        .range([height, 0])
+        .range([Hmapheight, 0])
         .domain(data.map((d) => d.state))
         .padding(0.05);
 
@@ -353,8 +393,8 @@
       // Add y axis label
       heatmap
         .append('text')
-        .attr('x', -height / 2 - 30)
-        .attr('y', -70)
+        .attr('x', -Hmapheight / 2 - 30)
+        .attr('y', -80)
         .text('State')
         .style('font-size', '20px')
         .attr('transform', 'rotate(-90)');
@@ -372,7 +412,7 @@
       heatmap
         .append('g')
         .attr('class', 'legendSequential')
-        .attr('transform', 'translate(570, -60)');
+        .attr('transform', 'translate(850, -60)');
 
       const legendSequential = d3
         .legendColor()
@@ -400,7 +440,7 @@
         ]);
 
       var tooltip = d3
-        .select('#chart-container')
+        .select('#heatmap')
         .append('div')
         .style('opacity', 0)
         .attr('class', 'tooltip')
@@ -416,7 +456,7 @@
       const mousemove = function (event, d) {
         tooltip
           .html(
-            'Total number of crime reported offenses: ' +
+            'Percent of Homeless Population: ' +
               d.percent +
               '%',
           )
@@ -461,7 +501,7 @@
       .append('text')
       .attr('x', 0)
       .attr('y', -60)
-      .style('font-size', '20px')
+      .style('font-size', '25px')
       .text(
         'Heatmap of percent homeless population for each variable',
       );
@@ -479,8 +519,6 @@
       );
   </script>
 </html>
-
-
 
           <!-- Seven -->
           <section class="wrapper style1 align-center">
@@ -501,7 +539,7 @@
   </body>
   <script>
     // Set the dimensions and margins
-    const barWidth = 1000;
+    const barWidth = 1300;
     const barHeight = 1000;
     const barmargin = {
       top: 80,
@@ -532,7 +570,7 @@
       .text(
         'Homelessness Population Change Across different States',
       )
-      .style('font-size', '25px');
+      .style('font-size', '30px');
 
     // Subtitle of graph
     bar
@@ -540,7 +578,7 @@
       .attr('x', -50)
       .attr('y', -20)
       .attr('text-anchor', 'left')
-      .style('font-size', '15px')
+      .style('font-size', '20px')
       .style('fill', 'grey')
       .text(
         'The difference between the population of an area from 2012-2013',
@@ -569,7 +607,7 @@
         .append('text')
         .attr('x', barwidth / 2 - 100)
         .attr('y', barheight + 50)
-        .style('font-size', '20px')
+        .style('font-size', '25px')
         .text('Change From Last Year');
 
       // y axis
@@ -590,7 +628,7 @@
         .attr('x', -barheight / 2 - 50)
         .attr('y', -120)
         .text('State')
-        .style('font-size', '20px')
+        .style('font-size', '25px')
         .attr('transform', 'rotate(-90)');
 
       // Color scale
@@ -639,12 +677,14 @@
       bar
         .append('g')
         .attr('class', 'legend')
-        .attr('transform', 'translate(660, -50)')
+        .attr('transform', 'translate(900, -30)')
         .call(legend);
     });
   </script>
 </html>
-						
+
+        
+
 				<!-- Footer -->
 					<footer class="wrapper style1 align-center">
 						<div class="inner">
