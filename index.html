@@ -267,9 +267,6 @@
 							<h2>Heatmap</h2>
 							<p>The top 10 states with the highest homeless population in different variables (Overall Homeless persons, Individuals, Chronic individuals, Chronic people in families, veterans). This graph is temporaly being made with Tableau, but will update to be a D3 design with more interactions (Title, tooltips, color scale).</p>
 						</div>
-						<div class="image">
-							<img src="images/heatmap.png" alt="" />
-						</div>
 <html>
   <head>
     <title>Homelessness Heatmap</title>
@@ -278,7 +275,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js"></script>
   </head>
   <body>
-    <div id="chart-container"></div>
+    <div id="heatmap"></div>
   </body>
   <script>
     // Set the dimensions
@@ -294,8 +291,8 @@
     const height = svgHeight - margin.top - margin.bottom;
 
     // set up the svg
-    const svg = d3
-      .select('#chart-container')
+    const heatmap = d3
+      .select('#heatmap')
       .append('svg')
       .attr('width', width + margin.left + margin.right)
       .attr('height', height + margin.top + margin.bottom)
@@ -326,7 +323,7 @@
         .domain(data.map((d) => d.variable))
         .padding(0.01);
 
-      svg
+      heatmap
         .append('g')
         .attr('transform', `translate(0, ${height})`)
         .call(d3.axisBottom(x).tickSize(0))
@@ -334,7 +331,7 @@
         .remove();
 
       // Add X axis label
-      svg
+      heatmap
         .append('text')
         .attr('x', width / 2 - 50)
         .attr('y', height + 40)
@@ -347,14 +344,14 @@
         .domain(data.map((d) => d.state))
         .padding(0.05);
 
-      svg
+      heatmap
         .append('g')
         .call(d3.axisLeft(y).tickSize(0))
         .select('.domain')
         .remove();
 
       // Add y axis label
-      svg
+      heatmap
         .append('text')
         .attr('x', -height / 2 - 30)
         .attr('y', -70)
@@ -372,7 +369,7 @@
           }),
         );
 
-      svg
+      heatmap
         .append('g')
         .attr('class', 'legendSequential')
         .attr('transform', 'translate(570, -60)');
@@ -385,11 +382,11 @@
         .scale(theresholdScale)
         .title('% Homeless Population:');
 
-      svg
+      heatmap
         .select('.legendSequential')
         .call(legendSequential);
-      svg.selectAll('.label').style('font-size', '10px');
-      svg
+      heatmap.selectAll('.label').style('font-size', '10px');
+      heatmap
         .selectAll('.legendTitle')
         .attr('font-size', '12px');
 
@@ -431,7 +428,7 @@
       };
 
       // Build the squares
-      svg
+      heatmap
         .selectAll()
         .data(data, function (d) {
           return d.state + ':' + d.variable;
@@ -460,7 +457,7 @@
     });
 
     // Title of graph
-    svg
+    heatmap
       .append('text')
       .attr('x', 0)
       .attr('y', -60)
@@ -470,7 +467,7 @@
       );
 
     // Subtitle of graph
-    svg
+    heatmap
       .append('text')
       .attr('x', 0)
       .attr('y', -30)
