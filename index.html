@@ -47,15 +47,192 @@
 					</section>
 
 				<!-- Three -->
-					<section class="spotlight style1 orient-left content-align-left image-position-center onscroll-image-fade-in">
-						<div class="content">
-							<h2>Interactive Maps</h2>
-							<p>US States Choropleth map with the total number of homelessness persons. This map is temporaly being made by datawrapper, but will update to be a D3 design with more interactions (Title, tooltips, color scale).</p>
-						</div>
-						<div class="image">
-							<img src="images/homelessness_map.png" alt="" />
-						</div>
-					</section>
+          <section class="wrapper style1 align-center">
+            <div class="inner">
+              <h2>Interactive Choropleth Map</h2>
+              <p>Multi-line chart to summarize the trend of homelessness in the United States for differnt variables from 2005-2013.</p>
+            </div>
+
+<html>
+  <head>
+    <title>Choropleth Map</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js"
+      integrity="sha512-wNH6xsp2n8CfB91nrBtfc4sfLwYPBMjSWVUwQOp60AYYXH6i8yCwuKFZ4rgK2i6pQek/b+bSyR7b01/922IBzQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+
+    <style>
+      .axis text {
+        font-size: 12px;
+      }
+
+      h1 {
+        color: #000000;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="choropleth_map"></div>
+    <script>
+      const mapWidth = 1500;
+      const mapHeight = 700;
+      const mapmargin = {
+        top: 100,
+        right: 20,
+        bottom: 50,
+        left: 200,
+      };
+      const mapwidth =
+        mapWidth - mapmargin.left - mapmargin.right;
+      const mapheight =
+        mapHeight - mapmargin.top - mapmargin.bottom;
+
+      var projection = d3
+        .geoAlbersUsa()
+        .translate([mapwidth / 2 - 200, mapheight / 2])
+        .scale([1250]);
+      var path = d3.geoPath().projection(projection);
+
+      //Creeating the svg element
+      const mapsvg = d3
+        .select('#choropleth_map')
+        .append('svg')
+        .attr('width', mapWidth)
+        .attr('height', mapHeight);
+
+      //Creating the Chart
+      const chart = mapsvg
+        .append('g')
+        .attr(
+          'transform',
+          `translate(${mapmargin.left},${mapmargin.top})`,
+        );
+
+      const tooltip = chart
+        .append('text')
+        .attr('class', 'tooltip')
+        .attr('fill', 'black');
+
+      //Add title
+      chart
+        .append('text')
+        .attr('class', 'Title')
+        .attr('x', -100)
+        .attr('y', -60)
+        .attr('fill', 'black')
+        .text(
+          'Choropleth Map - Homeless Population in 2013 in the United States',
+        )
+        .style('font-size', '30px');
+
+      // Subtitle of graph
+      chart
+        .append('text')
+        .attr('x', -100)
+        .attr('y', -30)
+        .attr('text-anchor', 'left')
+        .style('font-size', '18px')
+        .style('fill', 'grey')
+        .text(
+          'Which state has the highest total number of homeless persons?',
+        );
+
+      d3.csv(
+        'https://gist.githubusercontent.com/eunicetu16/dfa96a1c1723bdf0d60bc6d1449fcf3e/raw/abe6d3f353d620eb0808545aed1660a8f2a3616f/2013_homelesspop.csv',
+        function (d) {
+          return {
+            state: d.State,
+            homeless: +d.Total_Homeless_Persons,
+          };
+        },
+      ).then(function (data) {
+        var colorScale = d3
+          .scaleThreshold()
+          //.scaleQuantize()
+          .domain([
+            3000, 5000, 7000, 9000, 10000, 30000, 50000,
+            100000, 150000,
+          ])
+          .range(d3.schemeBlues[9]);
+
+        d3.json(
+          'https://gist.githubusercontent.com/eunicetu16/7d60c3fb3c6951e39c46261769395b23/raw/bb15b94c838154bd6b2285b24eece70125ee11d3/us-states.json',
+        ).then(function (json) {
+          for (var i = 0; i < data.length; i++) {
+            //state name
+            var dataState = data[i].state;
+            var homelessdata = data[i].homeless;
+
+            for (var j = 0; j < json.features.length; j++) {
+              var jsonState =
+                json.features[j].properties.name;
+              if (dataState == jsonState) {
+                json.features[j].properties.value =
+                  homelessdata;
+                break;
+              }
+            }
+          }
+
+          //Bind data and create one path per GeoJSON feature
+          chart
+            .selectAll('path')
+            .data(json.features)
+            .enter()
+            .append('path')
+            .attr('d', path)
+            .style('fill', function (d) {
+              var value = d.properties.value;
+              if (value) {
+                console.log(
+                  d.properties.name +
+                    '\n Homeless Population: ' +
+                    d.properties.value,
+                );
+                return colorScale(value);
+              } else {
+                return '#CCC';
+              }
+            })
+            .style('stroke', 'black')
+            .append('title')
+            .text(function (d) {
+              return (
+                d.properties.name +
+                '\n Homeless Population: ' +
+                d.properties.value
+              );
+            })
+            .on('mouseover', function (d) {
+              d3.select(this).style('fill', '#CCC');
+            });
+
+          chart
+            .append('g')
+            .attr('class', 'legendQuant')
+            .attr('transform', `translate(1000, 0)`);
+
+          var legendQuant = d3
+            .legendColor()
+            .shapeWidth(30)
+            .orient('vertical')
+            .labelFormat(d3.format('.0f'))
+            .scale(colorScale)
+            .title('Homeless Population:')
+            .titleWidth(200);
+
+          chart.select('.legendQuant').call(legendQuant);
+        });
+      });
+    </script>
+  </body>
+</html>
 
 					<!-- Four -->
 					<section class="wrapper style1 align-center">
@@ -76,13 +253,13 @@
   </body>
   <script>
     // Set the dimensions and margins
-    const svgWidth = 1300;
-    const svgHeight = 500;
+    const svgWidth = 1500;
+    const svgHeight = 600;
     const margin = {
-      top: 70,
+      top: 100,
       right: 200,
       bottom: 50,
-      left: 100,
+      left: 150,
     };
     const width = svgWidth - margin.left - margin.right;
     const height = svgHeight - margin.top - margin.bottom;
@@ -284,7 +461,7 @@
       svg
         .append('g')
         .attr('class', 'legend')
-        .attr('transform', 'translate(1020, -50)')
+        .attr('transform', 'translate(1200, -50)')
         .call(legend);
     });
   </script>
@@ -682,8 +859,6 @@
     });
   </script>
 </html>
-
-        
 
 				<!-- Footer -->
 					<footer class="wrapper style1 align-center">
