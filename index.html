@@ -115,7 +115,7 @@
           `translate(${mapmargin.left},${mapmargin.top})`,
         );
 
-      const tooltip = chart
+      const maptooltip = chart
         .append('text')
         .attr('class', 'tooltip')
         .attr('fill', 'black');
@@ -377,6 +377,7 @@
         .append('div')
         .attr('class', 'tooltip')
         .style('opacity', 0);
+
       // Add lines
       svg
         .selectAll('.line')
@@ -414,7 +415,7 @@
           return colorScale(d.variable);
         })
 
-        .on('mouseover', function (d, data) {
+        .on('mouseover', function (event, d) {
           tooltip
             .transition()
             .duration(200)
@@ -434,17 +435,19 @@
             .html(
               'In ' +
                 d.year.getFullYear() +
+                ', Homeless Population' +
+                '</br>' +
+                'was ' +
+                d.homelessness +
                 ' in ' +
                 d.variable +
-                '<br/>' +
-                'Homeless Population was ' +
-                d.homelessness +
                 '.',
             )
             .style('left', event.pageX + 10 + 'px')
-            .style('top', event.pageY - 30 + 'px');
+            .style('top', event.pageY - 60 + 'px') // Adjusting the vertical position
+            .style('pointer-events', 'none'); // Ensure tooltip doesn't interfere with mouse events on the chart
         })
-        .on('mouseout', function (d) {
+        .on('mouseout', function (event, d) {
           tooltip
             .transition()
             .duration(500)
@@ -461,7 +464,7 @@
       svg
         .append('g')
         .attr('class', 'legend')
-        .attr('transform', 'translate(1100, -50)')
+        .attr('transform', 'translate(1020, -50)')
         .call(legend);
     });
   </script>
