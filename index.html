@@ -81,13 +81,13 @@
   <body>
     <div id="choropleth_map"></div>
     <script>
-      const mapWidth = 1400;
+      const mapWidth = 1300;
       const mapHeight = 700;
       const mapmargin = {
         top: 100,
-        right: 100,
+        right: 20,
         bottom: 50,
-        left: 200,
+        left: 100,
       };
       const mapwidth =
         mapWidth - mapmargin.left - mapmargin.right;
@@ -97,17 +97,17 @@
       var projection = d3
         .geoAlbersUsa()
         .translate([mapwidth / 2 - 200, mapheight / 2])
-        .scale([1250]);
+        .scale([1200]);
       var path = d3.geoPath().projection(projection);
 
-      //Creeating the svg element
+      // Creating the SVG element
       const mapsvg = d3
-        .select('#choropleth_map')
+        .select('#chart-container')
         .append('svg')
         .attr('width', mapWidth)
         .attr('height', mapHeight);
 
-      //Creating the Chart
+      // Creating the Chart
       const chart = mapsvg
         .append('g')
         .attr(
@@ -115,27 +115,29 @@
           `translate(${mapmargin.left},${mapmargin.top})`,
         );
 
-      const maptooltip = chart
-        .append('text')
+      // Tooltip
+      const tooltip = d3
+        .select('body')
+        .append('div')
         .attr('class', 'tooltip')
-        .attr('fill', 'black');
+        .style('opacity', 0);
 
-      //Add title
+      // Add title
       chart
         .append('text')
         .attr('class', 'Title')
-        .attr('x', -100)
+        .attr('x', -50)
         .attr('y', -60)
         .attr('fill', 'black')
         .text(
-          'Choropleth Map - Homeless Population in 2013 in the United States',
+          'Choropleth Map - Homeless Population in 2021 in the United States',
         )
         .style('font-size', '30px');
 
       // Subtitle of graph
       chart
         .append('text')
-        .attr('x', -100)
+        .attr('x', -50)
         .attr('y', -30)
         .attr('text-anchor', 'left')
         .style('font-size', '18px')
@@ -155,7 +157,6 @@
       ).then(function (data) {
         var colorScale = d3
           .scaleThreshold()
-          //.scaleQuantize()
           .domain([
             3000, 5000, 7000, 9000, 10000, 30000, 50000,
             100000, 150000,
@@ -166,7 +167,7 @@
           'https://gist.githubusercontent.com/eunicetu16/7d60c3fb3c6951e39c46261769395b23/raw/bb15b94c838154bd6b2285b24eece70125ee11d3/us-states.json',
         ).then(function (json) {
           for (var i = 0; i < data.length; i++) {
-            //state name
+            // State name
             var dataState = data[i].state;
             var homelessdata = data[i].homeless;
 
@@ -181,7 +182,7 @@
             }
           }
 
-          //Bind data and create one path per GeoJSON feature
+          // Bind data and create one path per GeoJSON feature
           chart
             .selectAll('path')
             .data(json.features)
@@ -191,27 +192,41 @@
             .style('fill', function (d) {
               var value = d.properties.value;
               if (value) {
-                console.log(
-                  d.properties.name +
-                    '\n Homeless Population: ' +
-                    d.properties.value,
-                );
                 return colorScale(value);
               } else {
                 return '#CCC';
               }
             })
             .style('stroke', 'black')
-            .append('title')
-            .text(function (d) {
-              return (
-                d.properties.name +
-                '\n Homeless Population: ' +
-                d.properties.value
-              );
+            .on('mouseover', function (event, d) {
+              tooltip
+                .transition()
+                .duration(200)
+                .style('opacity', 0.85);
+              tooltip
+                .style('position', 'absolute')
+                .style('text-align', 'center')
+                .style('padding', '5px')
+                .style('font-size', '12.5px')
+                .style('background', 'rgb(231, 231, 229)')
+                .style('border', '0px')
+                .style('border-radius', '6px')
+                .style('pointer-events', 'none');
+              tooltip
+                .html(
+                  d.properties.name +
+                    '</br>' +
+                    'Homeless Population: ' +
+                    d.properties.value,
+                )
+                .style('left', event.pageX + 10 + 'px')
+                .style('top', event.pageY - 60 + 'px');
             })
-            .on('mouseover', function (d) {
-              d3.select(this).style('fill', '#CCC');
+            .on('mouseout', function (event, d) {
+              tooltip
+                .transition()
+                .duration(500)
+                .style('opacity', 0);
             });
 
           chart
