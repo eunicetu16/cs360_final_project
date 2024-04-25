@@ -128,7 +128,7 @@
         .attr('y', -60)
         .attr('fill', 'black')
         .text(
-          'Choropleth Map - Homeless Population in 2013 in the United States',
+          'Choropleth Map - Homeless Population in 2021 in the United States',
         )
         .style('font-size', '30px');
 
@@ -198,11 +198,11 @@
             })
             .style('stroke', 'black')
             .on('mouseover', function (event, d) {
-              tooltip
+              maptooltip
                 .transition()
                 .duration(200)
                 .style('opacity', 0.85);
-              tooltip
+              maptooltip
                 .style('position', 'absolute')
                 .style('text-align', 'center')
                 .style('padding', '5px')
@@ -211,7 +211,7 @@
                 .style('border', '0px')
                 .style('border-radius', '6px')
                 .style('pointer-events', 'none');
-              tooltip
+              maptooltip
                 .html(
                   d.properties.name +
                     '</br>' +
@@ -222,7 +222,7 @@
                 .style('top', event.pageY - 60 + 'px');
             })
             .on('mouseout', function (event, d) {
-              tooltip
+              maptooltip
                 .transition()
                 .duration(500)
                 .style('opacity', 0);
