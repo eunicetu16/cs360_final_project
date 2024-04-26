@@ -645,7 +645,7 @@
       .select('.domain')
       .remove();
 
-            // Build color scale
+      // Build color scale
       const theresholdScale = d3
         .scaleThreshold(d3.interpolateBlues)
         .domain([10, 30, 50, 70, 90])
@@ -680,6 +680,18 @@
       .scaleSequential(d3.interpolateBlues)
       .domain([0, d3.max(data, (d) => d.percent)]);
 
+      const tooltip = d3
+      .select('body')
+      .append('div')
+      .attr('class', 'tooltip')
+      .style('opacity', 0)
+      .style('position', 'absolute')
+      .style('text-align', 'center')
+      .style('padding', '5px')
+      .style('font-size', '12.5px')
+      .style('background', 'white')
+      .style('border-width', '2px')
+      .style('border-radius', '5px');
     heatmap
       .selectAll()
       .data(data, function (d) {
