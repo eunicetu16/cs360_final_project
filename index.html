@@ -700,7 +700,12 @@
       .on('mouseover', function (event, d) {
         tooltip
           .style('opacity', 1)
-          .html('Percent of Homeless Population: ' + d.percent + '%')
+          .html(
+            'State: ' + d.state +
+            '</br>' +
+            'Variable: ' + d.variable + 
+            '</br>' +
+            'Percent of Homeless Population: ' + d.percent + '%')
           .style('left', event.pageX + 'px')
           .style('top', event.pageY - 30 + 'px');
       })
