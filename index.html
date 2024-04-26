@@ -645,6 +645,37 @@
       .select('.domain')
       .remove();
 
+            // Build color scale
+      const theresholdScale = d3
+        .scaleThreshold(d3.interpolateBlues)
+        .domain([10, 30, 50, 70, 90])
+        .range(
+          d3.range(5).map(function (i) {
+            return d3.interpolateBlues(i / 5);
+          }),
+        );
+
+      heatmap
+        .append('g')
+        .attr('class', 'legendSequential')
+        .attr('transform', 'translate(875, -60)');
+
+      const legendSequential = d3
+        .legendColor()
+        .shapeWidth(60)
+        .orient('horizontal')
+        .labelFormat(d3.format('.0f'))
+        .scale(theresholdScale)
+        .title('% Homeless Population:');
+
+      heatmap
+        .select('.legendSequential')
+        .call(legendSequential);
+      heatmap.selectAll('.label').style('font-size', '10px');
+      heatmap
+        .selectAll('.legendTitle')
+        .attr('font-size', '12px');
+
     const colorScale = d3
       .scaleSequential(d3.interpolateBlues)
       .domain([0, d3.max(data, (d) => d.percent)]);
