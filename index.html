@@ -50,8 +50,7 @@
           <section class="wrapper style1 align-center">
             <div class="inner">
               <h2>Interactive Choropleth Map</h2>
-              <p>Choropleth Map of the US shows the total amount of homeless persons in each states in a sequential color scale. When you hover over to each state, it will shows the information tooltip. And we can see that the homeless population is higher in both west and east America.
-</p>
+              <p>The Choropleth Map of the United States offers a visual representation of homelessness, with a sequential color scale indicating the total number of homeless individuals in each state. Hovering over a state reveals detailed information. The map highlights higher concentrations of homelessness in both the western and eastern regions of the country, prompting reflection on regional disparities and the need for comprehensive solutions.</p>
             </div>
 
 <html>
@@ -81,179 +80,194 @@
   <body>
     <div id="choropleth_map"></div>
     <script>
-      const mapWidth = 1400;
-      const mapHeight = 700;
-      const mapmargin = {
-        top: 100,
-        right: 100,
-        bottom: 50,
-        left: 200,
+        const mapWidth = 1400;
+  const mapHeight = 700;
+  const mapmargin = {
+    top: 100,
+    right: 100,
+    bottom: 50,
+    left: 200,
+  };
+  const mapwidth =
+    mapWidth - mapmargin.left - mapmargin.right;
+  const mapheight =
+    mapHeight - mapmargin.top - mapmargin.bottom;
+
+  var projection = d3
+    .geoAlbersUsa()
+    .translate([mapwidth / 2 - 200, mapheight / 2])
+    .scale([1250]);
+  var path = d3.geoPath().projection(projection);
+
+  // Creating the svg element
+  const mapsvg = d3
+    .select('#choropleth_map')
+    .append('svg')
+    .attr('width', mapWidth)
+    .attr('height', mapHeight);
+
+  // Creating the Chart
+  const chart = mapsvg
+    .append('g')
+    .attr(
+      'transform',
+      `translate(${mapmargin.left},${mapmargin.top})`,
+    );
+
+  // Tooltip
+  const maptooltip = d3
+    .select('body')
+    .append('div')
+    .attr('class', 'maptooltip')
+    .style('opacity', 0)
+    .style('position', 'absolute')
+    .style('text-align', 'center')
+    .style('padding', '5px')
+    .style('font-size', '12.5px')
+    .style('background', 'rgb(231, 231, 229)')
+    .style('border', '0px')
+    .style('border-radius', '6px')
+    .style('pointer-events', 'none');
+
+  // Add title
+  chart
+    .append('text')
+    .attr('class', 'Title')
+    .attr('x', -100)
+    .attr('y', -60)
+    .attr('fill', 'black')
+    .text(
+      'Choropleth Map - Homeless Population in 2021 in the United States',
+    )
+    .style('font-size', '30px');
+
+  // Subtitle of graph
+  chart
+    .append('text')
+    .attr('x', -100)
+    .attr('y', -30)
+    .attr('text-anchor', 'left')
+    .style('font-size', '18px')
+    .style('fill', 'grey')
+    .text(
+      'Which state has the highest total number of homeless persons?',
+    );
+
+  d3.csv(
+    'https://gist.githubusercontent.com/eunicetu16/dfa96a1c1723bdf0d60bc6d1449fcf3e/raw/abe6d3f353d620eb0808545aed1660a8f2a3616f/2013_homelesspop.csv',
+    function (d) {
+      return {
+        state: d.State,
+        homeless: +d.Total_Homeless_Persons,
       };
-      const mapwidth =
-        mapWidth - mapmargin.left - mapmargin.right;
-      const mapheight =
-        mapHeight - mapmargin.top - mapmargin.bottom;
+    },
+  ).then(function (data) {
+    var colorScale = d3
+      .scaleThreshold()
+      //.scaleQuantize()
+      .domain([
+        3000, 5000, 7000, 9000, 10000, 30000, 50000,
+        100000, 150000,
+      ])
+      .range(d3.schemeBlues[9]);
 
-      var projection = d3
-        .geoAlbersUsa()
-        .translate([mapwidth / 2 - 200, mapheight / 2])
-        .scale([1250]);
-      var path = d3.geoPath().projection(projection);
+    d3.json(
+      'https://gist.githubusercontent.com/eunicetu16/7d60c3fb3c6951e39c46261769395b23/raw/bb15b94c838154bd6b2285b24eece70125ee11d3/us-states.json',
+    ).then(function (json) {
+      for (var i = 0; i < data.length; i++) {
+        //state name
+        var dataState = data[i].state;
+        var homelessdata = data[i].homeless;
 
-      //Creeating the svg element
-      const mapsvg = d3
-        .select('#choropleth_map')
-        .append('svg')
-        .attr('width', mapWidth)
-        .attr('height', mapHeight);
-
-      //Creating the Chart
-      const chart = mapsvg
-        .append('g')
-        .attr(
-          'transform',
-          `translate(${mapmargin.left},${mapmargin.top})`,
-        );
-
-      const maptooltip = chart
-        .append('text')
-        .attr('class', 'tooltip')
-        .attr('fill', 'black');
-
-      //Add title
-      chart
-        .append('text')
-        .attr('class', 'Title')
-        .attr('x', -100)
-        .attr('y', -60)
-        .attr('fill', 'black')
-        .text(
-          'Choropleth Map - Homeless Population in 2021 in the United States',
-        )
-        .style('font-size', '30px');
-
-      // Subtitle of graph
-      chart
-        .append('text')
-        .attr('x', -100)
-        .attr('y', -30)
-        .attr('text-anchor', 'left')
-        .style('font-size', '18px')
-        .style('fill', 'grey')
-        .text(
-          'Which state has the highest total number of homeless persons?',
-        );
-
-      d3.csv(
-        'https://gist.githubusercontent.com/eunicetu16/dfa96a1c1723bdf0d60bc6d1449fcf3e/raw/abe6d3f353d620eb0808545aed1660a8f2a3616f/2013_homelesspop.csv',
-        function (d) {
-          return {
-            state: d.State,
-            homeless: +d.Total_Homeless_Persons,
-          };
-        },
-      ).then(function (data) {
-        var colorScale = d3
-          .scaleThreshold()
-          //.scaleQuantize()
-          .domain([
-            3000, 5000, 7000, 9000, 10000, 30000, 50000,
-            100000, 150000,
-          ])
-          .range(d3.schemeBlues[9]);
-
-        d3.json(
-          'https://gist.githubusercontent.com/eunicetu16/7d60c3fb3c6951e39c46261769395b23/raw/bb15b94c838154bd6b2285b24eece70125ee11d3/us-states.json',
-        ).then(function (json) {
-          for (var i = 0; i < data.length; i++) {
-            //state name
-            var dataState = data[i].state;
-            var homelessdata = data[i].homeless;
-
-            for (var j = 0; j < json.features.length; j++) {
-              var jsonState =
-                json.features[j].properties.name;
-              if (dataState == jsonState) {
-                json.features[j].properties.value =
-                  homelessdata;
-                break;
-              }
-            }
+        for (var j = 0; j < json.features.length; j++) {
+          var jsonState =
+            json.features[j].properties.name;
+          if (dataState == jsonState) {
+            json.features[j].properties.value =
+              homelessdata;
+            break;
           }
+        }
+      }
 
-           // Bind data and create one path per GeoJSON feature
-          chart
-            .selectAll('path')
-            .data(json.features)
-            .enter()
-            .append('path')
-            .attr('d', path)
-            .style('fill', function (d) {
-              var value = d.properties.value;
-              if (value) {
-                return colorScale(value);
-              } else {
-                return '#CCC';
-              }
-            })
-            .style('stroke', 'black')
-            .on('mouseover', function (event, d) {
-              maptooltip
-                .transition()
-                .duration(200)
-                .style('opacity', 0.85);
-              maptooltip
-                .style('position', 'absolute')
-                .style('text-align', 'center')
-                .style('padding', '5px')
-                .style('font-size', '12.5px')
-                .style('background', 'rgb(231, 231, 229)')
-                .style('border', '0px')
-                .style('border-radius', '6px')
-                .style('pointer-events', 'none');
-              maptooltip
-                .html(
-                  d.properties.name +
-                    '</br>' +
-                    'Homeless Population: ' +
-                    d.properties.value,
-                )
-                .style('left', d3.event.pageX + 10 + 'px')
-                .style('top', d3.event.pageY - 60 + 'px');
-            })
-            .on('mouseout', function (event, d) {
-              maptooltip
-                .transition()
-                .duration(500)
-                .style('opacity', 0);
-            });
+       // Bind data and create one path per GeoJSON feature
+      chart
+        .selectAll('path')
+        .data(json.features)
+        .enter()
+        .append('path')
+        .attr('d', path)
+        .style('fill', function (d) {
+          var value = d.properties.value;
+          if (value) {
+            return colorScale(value);
+          } else {
+            return '#CCC';
+          }
+        })
+        .style('stroke', 'black')
 
-          chart
-            .append('g')
-            .attr('class', 'legendQuant')
-            .attr('transform', `translate(900, 0)`);
-
-          var legendQuant = d3
-            .legendColor()
-            .shapeWidth(30)
-            .orient('vertical')
-            .labelFormat(d3.format('.0f'))
-            .scale(colorScale)
-            .title('Homeless Population:')
-            .titleWidth(200);
-
-          chart.select('.legendQuant').call(legendQuant);
+        .on('mouseover', function (event, d) {
+          maptooltip
+            .transition()
+            .duration(200)
+            .style('opacity', 0.85);
+          maptooltip
+            .html(
+              d.properties.name +
+                '<br/>' +
+                'Homeless Population: ' +
+                d.properties.value,
+            )
+            .style('left', event.pageX + 10 + 'px')
+            .style('top', event.pageY - 60 + 'px');
+        })
+        .on('mouseout', function (event, d) {
+          maptooltip
+            .transition()
+            .duration(500)
+            .style('opacity', 0);
         });
-      });
+
+      chart
+        .append('g')
+        .attr('class', 'legendQuant')
+        .attr('transform', `translate(900, 0)`);
+
+      var legendQuant = d3
+        .legendColor()
+        .shapeWidth(30)
+        .orient('vertical')
+        .labelFormat(d3.format('.0f'))
+        .scale(colorScale)
+        .title('Homeless Population:')
+        .titleWidth(200);
+
+      chart.select('.legendQuant').call(legendQuant);
+    });
+  });
+
     </script>
   </body>
 </html>
+        
 
-					<!-- Four -->
+        <!-- Four -->
+        <section class="spotlight style1 orient-left content-align-left image-position-center onscroll-image-fade-in">
+            <div class="content">
+              <h2>“Don’t try to drive the homeless into place we find suitable. Help them survive in places they find suitable.”</h2>
+              <p> - Daniel Quinn</p>
+            </div>
+            <div class="image">
+              <img src="images/homeless_cartoon.jpg" alt="" />
+            </div>
+          </section>  
+
+					<!-- Five -->
 					<section class="wrapper style1 align-center">
 						<div class="inner">
 							<h2>Multi-Line Chart with Time-serires</h2>
-							<p>Multi-line chart to summarize the trend of homelessness in the United States for differnt variables from 2005-2013.</p>
+							<p>The multi-line chart succinctly encapsulates the trajectory of homelessness in the United States across various variables from <strong>2005 to 2013</strong>. Each line represents a distinct variable, offering a comprehensive overview of the trends over the specified period. The visualization allows for easy comparison and identification of patterns, shedding light on the evolving landscape of homelessness in the nation. From demographic shifts to policy impacts, the chart serves as a valuable tool for understanding the complex dynamics influencing homelessness over time.</p>
 						</div>
 
 <html>
@@ -453,7 +467,7 @@
                 '</br>' +
                 'was ' +
                 d.homelessness +
-                ' in ' +
+                ' for ' +
                 d.variable +
                 '.',
             )
@@ -484,22 +498,83 @@
   </script>
 </html>
 
-				<!-- Five -->
-        <section class="spotlight style1 orient-left content-align-left image-position-center onscroll-image-fade-in">
-            <div class="content">
-              <h2>“Don’t try to drive the homeless into place we find suitable. Help them survive in places they find suitable.”</h2>
-              <p> - Daniel Quinn</p>
+ <!-- Gallery -->
+          <section class="wrapper style1 align-center">
+            <div class="inner">
+              <h2>Variables</h2>
+              <p>This is a <strong>Gallery</strong> specifically curated to present a wide range of variables related to homelessness, offering in-depth descriptions and analyses aimed at fostering a profound understanding of the multifaceted factors contributing to this pressing societal issue. Through the exploration of these variables, ranging from economic factors to social dynamics and institutional frameworks, viewers can gain valuable insights into the complex landscape of homelessness and the various challenges faced by individuals experiencing housing insecurity.</p>
             </div>
-            <div class="image">
-              <img src="images/homeless_cartoon.jpg" alt="" />
-            </div>
-          </section>  
+
+            <!-- Gallery -->
+              <div class="gallery style2 medium lightbox onscroll-fade-in">
+                <article>
+                  <a href="images/individual.jpg" class="image">
+                    <img src="images/individual.jpg" alt="" />
+                  </a>
+                  <div class="caption">
+                    <h3>Individual</h3>
+                    <p>Homeless individuals, including both sheltered and unsheltered populations.</p>
+                  </div>
+                </article>
+                <article>
+                  <a href="images/family.jpg" class="image">
+                    <img src="images/family.jpg" alt="" />
+                  </a>
+                  <div class="caption">
+                    <h3>People in Families</h3>
+                    <p>People in chronically homeless families, those in families that have been homeless repeatedly or for extended periods of time and have a head of household with a disability.</p>
+                  </div>
+                </article>
+                <article>
+                  <a href="images/Chronic.jpg" class="image">
+                    <img src="images/Chronic.jpg" alt="" />
+                  </a>
+                  <div class="caption">
+                    <h3>Chronic Individuals</h3>
+                    <p>Chronic homelessness is defined as homelessness among people who have a disability—including serious mental illness, chronic substance use disorders, or chronic medical issues—and who are homeless repeatedly or for long periods of time.</p>
+                  </div>
+                </article>
+                <article>
+                  <a href="images/veterans.jpg" class="image">
+                    <img src="images/veterans.jpg" alt="" />
+                  </a>
+                  <div class="caption">
+                    <h3>Veterans</h3>
+                    <p>Homeless veterans are persons who have served in the armed forces who are homeless or living without access to secure and appropriate accommodation.</p>
+                  </div>
+                </article>
+                <article>
+                  <a href="images/Children.jpg" class="image">
+                    <img src="images/Children.jpg" alt="" />
+                  </a>
+                  <div class="caption">
+                    <h3>Unaccompanied Children and youth</h3>
+                    <p>Those individuals experiencing homelessness who are unattached to a family households and under the age of 25 including unaccompanied children under the age of 18.</p>
+                </div>
+                </article>
+                <article>
+                  <a href="images/unsheltered.jpg" class="image">
+                    <img src="images/unsheltered.jpg" alt="" />
+                  </a>
+                  <div class="caption">
+                    <h3>Unsheltered persons</h3>
+                    <p>The homeless population living in unsheltered situations, such as on the streets or in other locations not intended for human habitation.</p>
+                    </div>
+                </article>
+              </div>
+
+          </section>
+
 
           <!-- Six -->
 					<section class="wrapper style1 align-center">
 						<div class="inner">
 							<h2>Heatmap</h2>
-							<p>The top 10 states with the highest homeless population in different variables (Overall Homeless persons, Individuals, Chronic individuals, Chronic people in families, veterans). This graph is temporaly being made with Tableau, but will update to be a D3 design with more interactions (Title, tooltips, color scale).</p>
+							<p>The comprehensive analysis identifies the top 10 states with the highest homeless population across various variables. This breakdown offers valuable insights into the specific challenges faced by different demographic groups and highlights geographic hotspots where homelessness is particularly acute. By pinpointing these states, policymakers and stakeholders can prioritize resources and interventions to address the diverse needs of homeless populations across the country, fostering more targeted and effective solutions.
+                <br>
+                <br>
+                **The percentages of the homeless population for each state do not necessarily need to add up to 100%. These percentages represent different categories or subgroups within the homeless population, and individuals can fall into multiple categories simultaneously.**
+              </p>
 						</div>
 <html>
   <head>
@@ -512,205 +587,254 @@
     <div id="heatmap"></div>
   </body>
   <script>
-    // Set the dimensions
-    const HmapWidth = 1300;
-    const HmapHeight = 500;
-    const Hmapmargin = {
-      top: 80,
-      right: 20,
-      bottom: 50,
-      left: 100,
+  const HmapWidth = 1500;
+  const HmapHeight = 600;
+  const Hmapmargin = {
+    top: 80,
+    right: 20,
+    bottom: 50,
+    left: 100,
+  };
+  const Hmapwidth = HmapWidth - Hmapmargin.left - Hmapmargin.right;
+  const Hmapheight = HmapHeight - Hmapmargin.top - Hmapmargin.bottom;
+
+  const heatmap = d3
+    .select('#heatmap')
+    .append('svg')
+    .attr('width', HmapWidth)
+    .attr('height', HmapHeight)
+    .append('g')
+    .attr('transform', `translate(${Hmapmargin.left},${Hmapmargin.top})`);
+
+  const heatmapUrl =
+    'https://gist.githubusercontent.com/eunicetu16/a2d1d82e473376eb6f542fb42f814330/raw/a2bebada2d48db13a3cf3ad1a039e874b74780cd/Top_10_homeless_pop.csv';
+
+  d3.csv(heatmapUrl, function (d) {
+    return {
+      variable: d.Variable,
+      state: d.State,
+      percent: d.Percentage,
     };
-    const Hmapwidth = HmapWidth - Hmapmargin.left - Hmapmargin.right;
-    const Hmapheight = HmapHeight - Hmapmargin.top - Hmapmargin.bottom;
-
-    // set up the svg
-    const heatmap = d3
-      .select('#heatmap')
-      .append('svg')
-      .attr('width', Hmapwidth + Hmapmargin.left + Hmapmargin.right)
-      .attr('height', Hmapheight + Hmapmargin.top + Hmapmargin.bottom)
-      .append('g')
-      .attr(
-        'transform',
-        `translate(${Hmapmargin.left},${Hmapmargin.top})`,
-      );
-
-    //Read data and add tooltip
-    const heatmapUrl =
-      'https://gist.githubusercontent.com/eunicetu16/a2d1d82e473376eb6f542fb42f814330/raw/a2bebada2d48db13a3cf3ad1a039e874b74780cd/Top_10_homeless_pop.csv';
-    d3.csv(heatmapUrl, function (d) {
-      return {
-        variable: d.Variable,
-        state: d.State,
-        percent: d.Percentage,
-      };
-    }).then(function (data) {
-      data.forEach((d) => {
-        d.percent = +d.percent;
-      });
-
-      // Set X scales and axis:
-      const x = d3
-        .scaleBand()
-        .range([0, Hmapwidth])
-        .domain(data.map((d) => d.variable))
-        .padding(0.01);
-
-      heatmap
-        .append('g')
-        .attr('transform', `translate(0, ${Hmapheight})`)
-        .call(d3.axisBottom(x).tickSize(0))
-        .select('.domain')
-        .remove();
-
-      // Add X axis label
-      heatmap
-        .append('text')
-        .attr('x', Hmapwidth / 2 - 50)
-        .attr('y', Hmapheight + 40)
-        .style('font-size', '20px')
-        .text('Variables');
-
-      const y = d3
-        .scaleBand()
-        .range([Hmapheight, 0])
-        .domain(data.map((d) => d.state))
-        .padding(0.05);
-
-      heatmap
-        .append('g')
-        .call(d3.axisLeft(y).tickSize(0))
-        .select('.domain')
-        .remove();
-
-      // Add y axis label
-      heatmap
-        .append('text')
-        .attr('x', -Hmapheight / 2 - 30)
-        .attr('y', -80)
-        .text('State')
-        .style('font-size', '20px')
-        .attr('transform', 'rotate(-90)');
-
-      // Build color scale
-      const theresholdScale = d3
-        .scaleThreshold(d3.interpolateBlues)
-        .domain([10, 30, 50, 70, 90])
-        .range(
-          d3.range(5).map(function (i) {
-            return d3.interpolateBlues(i / 5);
-          }),
-        );
-
-      heatmap
-        .append('g')
-        .attr('class', 'legendSequential')
-        .attr('transform', 'translate(850, -60)');
-
-      const legendSequential = d3
-        .legendColor()
-        .shapeWidth(60)
-        .orient('horizontal')
-        .labelFormat(d3.format('.0f'))
-        .scale(theresholdScale)
-        .title('% Homeless Population:');
-
-      heatmap
-        .select('.legendSequential')
-        .call(legendSequential);
-      heatmap.selectAll('.label').style('font-size', '10px');
-      heatmap
-        .selectAll('.legendTitle')
-        .attr('font-size', '12px');
-
-      var colorScale = d3
-        .scaleSequential(d3.interpolateBlues)
-        .domain([
-          0,
-          d3.max(data, function (d) {
-            return d.percent;
-          }),
-        ]);
-
-      var tooltip = d3
-        .select('#heatmap')
-        .append('div')
-        .style('opacity', 0)
-        .attr('class', 'tooltip')
-        .style('background-color', 'white')
-        .style('border', 'solid')
-        .style('border-width', '2px')
-        .style('border-radius', '5px')
-        .style('padding', '5px');
-
-      const mouseover = function (event, d) {
-        tooltip.style('opacity', 1);
-      };
-      const mousemove = function (event, d) {
-        tooltip
-          .html(
-            'Percent of Homeless Population: ' +
-              d.percent +
-              '%',
-          )
-          .style('left', event.x / 2 + 'px')
-          .style('top', event.y / 2 + 'px');
-      };
-      const mouseleave = function (d) {
-        tooltip.style('opacity', 0);
-      };
-
-      // Build the squares
-      heatmap
-        .selectAll()
-        .data(data, function (d) {
-          return d.state + ':' + d.variable;
-        })
-        .enter()
-        .append('rect')
-        .attr('x', function (d) {
-          return x(d.variable);
-        })
-        .attr('y', function (d) {
-          return y(d.state);
-        })
-        .attr('rx', 4)
-        .attr('ry', 4)
-        .attr('width', x.bandwidth())
-        .attr('height', y.bandwidth())
-        .style('fill', function (d) {
-          return colorScale(d.percent);
-        })
-        .style('stroke-width', 4)
-        .style('stroke', 'none')
-        .style('opacity', 0.8)
-        .on('mouseover', mouseover)
-        .on('mousemove', mousemove)
-        .on('mouseleave', mouseleave);
+  }).then(function (data) {
+    data.forEach((d) => {
+      d.percent = +d.percent;
     });
 
-    // Title of graph
-    heatmap
-      .append('text')
-      .attr('x', 0)
-      .attr('y', -60)
-      .style('font-size', '25px')
-      .text(
-        'Heatmap of percent homeless population for each variable',
-      );
+    const x = d3
+      .scaleBand()
+      .range([0, Hmapwidth])
+      .domain(data.map((d) => d.variable))
+      .padding(0.01);
 
-    // Subtitle of graph
     heatmap
+      .append('g')
+      .attr('transform', `translate(0, ${Hmapheight})`)
+      .call(d3.axisBottom(x).tickSize(0))
+      .select('.domain')
+      .remove();
+
+    const y = d3
+      .scaleBand()
+      .range([Hmapheight, 0])
+      .domain(data.map((d) => d.state))
+      .padding(0.05);
+
+    heatmap
+      .append('g')
+      .call(d3.axisLeft(y).tickSize(0))
+      .select('.domain')
+      .remove();
+
+    const colorScale = d3
+      .scaleSequential(d3.interpolateBlues)
+      .domain([0, d3.max(data, (d) => d.percent)]);
+
+    heatmap
+      .selectAll()
+      .data(data, function (d) {
+        return d.state + ':' + d.variable;
+      })
+      .enter()
+      .append('rect')
+      .attr('x', (d) => x(d.variable))
+      .attr('y', (d) => y(d.state))
+      .attr('rx', 4)
+      .attr('ry', 4)
+      .attr('width', x.bandwidth())
+      .attr('height', y.bandwidth())
+      .style('fill', (d) => colorScale(d.percent))
+      .style('stroke-width', 4)
+      .style('stroke', 'none')
+      .style('opacity', 0.8)
+      .on('mouseover', function (event, d) {
+        tooltip
+          .style('opacity', 1)
+          .html('Percent of Homeless Population: ' + d.percent + '%')
+          .style('left', event.pageX + 'px')
+          .style('top', event.pageY - 30 + 'px');
+      })
+      .on('mouseout', function (d) {
+        tooltip.style('opacity', 0);
+      });
+
+    heatmap
+      .selectAll('.percent-text')
+      .data(data, function (d) {
+        return d.state + ':' + d.variable;
+      })
+      .enter()
       .append('text')
-      .attr('x', 0)
-      .attr('y', -30)
-      .attr('text-anchor', 'left')
-      .style('font-size', '15px')
-      .style('fill', 'grey')
-      .text(
-        'Top 10 states with the highest homeless population',
-      );
+      .attr('class', 'percent-text')
+      .attr('x', (d) => x(d.variable) + x.bandwidth() / 2)
+      .attr('y', (d) => y(d.state) + y.bandwidth() / 2)
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'central')
+      .style('fill', 'black')
+      .text((d) => d.percent + '%');
+  });
+
+  heatmap
+    .append('text')
+    .attr('x', 0)
+    .attr('y', -60)
+    .style('font-size', '25px')
+    .text('Heatmap of percent homeless population for each variable');
+
+  heatmap
+    .append('text')
+    .attr('x', 0)
+    .attr('y', -30)
+    .attr('text-anchor', 'left')
+    .style('font-size', '15px')
+    .style('fill', 'grey')
+    .text('Top 10 states with the highest homeless population');
+
+
+  // const HmapWidth = 1300;
+  // const HmapHeight = 500;
+  // const Hmapmargin = {
+  //   top: 80,
+  //   right: 20,
+  //   bottom: 50,
+  //   left: 100,
+  // };
+  // const Hmapwidth = HmapWidth - Hmapmargin.left - Hmapmargin.right;
+  // const Hmapheight = HmapHeight - Hmapmargin.top - Hmapmargin.bottom;
+
+  // const heatmap = d3
+  //   .select('#heatmap')
+  //   .append('svg')
+  //   .attr('width', HmapWidth)
+  //   .attr('height', HmapHeight)
+  //   .append('g')
+  //   .attr('transform', `translate(${Hmapmargin.left},${Hmapmargin.top})`);
+
+  // const heatmapUrl =
+  //   'https://gist.githubusercontent.com/eunicetu16/a2d1d82e473376eb6f542fb42f814330/raw/a2bebada2d48db13a3cf3ad1a039e874b74780cd/Top_10_homeless_pop.csv';
+
+  // d3.csv(heatmapUrl, function (d) {
+  //   return {
+  //     variable: d.Variable,
+  //     state: d.State,
+  //     percent: d.Percentage,
+  //   };
+  // }).then(function (data) {
+  //   data.forEach((d) => {
+  //     d.percent = +d.percent;
+  //   });
+
+  //   const x = d3
+  //     .scaleBand()
+  //     .range([0, Hmapwidth])
+  //     .domain(data.map((d) => d.variable))
+  //     .padding(0.01);
+
+  //   heatmap
+  //     .append('g')
+  //     .attr('transform', `translate(0, ${Hmapheight})`)
+  //     .call(d3.axisBottom(x).tickSize(0))
+  //     .select('.domain')
+  //     .remove();
+
+  //   const y = d3
+  //     .scaleBand()
+  //     .range([Hmapheight, 0])
+  //     .domain(data.map((d) => d.state))
+  //     .padding(0.05);
+
+  //   heatmap
+  //     .append('g')
+  //     .call(d3.axisLeft(y).tickSize(0))
+  //     .select('.domain')
+  //     .remove();
+
+  //   const colorScale = d3
+  //     .scaleSequential(d3.interpolateBlues)
+  //     .domain([0, d3.max(data, (d) => d.percent)]);
+
+  //   const tooltip = d3
+  //     .select('body')
+  //     .append('div')
+  //     .attr('class', 'tooltip')
+  //     .style('opacity', 0)
+  //     .style('position', 'absolute')
+  //     .style('text-align', 'center')
+  //     .style('padding', '5px')
+  //     .style('font-size', '12.5px')
+  //     .style('background', 'white')
+  //     .style('border-width', '2px')
+  //     .style('border-radius', '5px');
+
+  //   const mouseover = function (event, d) {
+  //     tooltip
+  //       .style('opacity', 1)
+  //       .html('Percent Homeless Population: ' + d.percent + '%')
+  //       .style('left', event.pageX + 'px')
+  //       .style('top', event.pageY - 30 + 'px');
+  //   };
+
+  //   const mouseout = function (d) {
+  //     tooltip.style('opacity', 0);
+  //   };
+
+  //   heatmap
+  //     .selectAll()
+  //     .data(data, function (d) {
+  //       return d.state + ':' + d.variable;
+  //     })
+  //     .enter()
+  //     .append('rect')
+  //     .attr('x', (d) => x(d.variable))
+  //     .attr('y', (d) => y(d.state))
+  //     .attr('rx', 4)
+  //     .attr('ry', 4)
+  //     .attr('width', x.bandwidth())
+  //     .attr('height', y.bandwidth())
+  //     .style('fill', (d) => colorScale(d.percent))
+  //     .style('stroke-width', 4)
+  //     .style('stroke', 'none')
+  //     .style('opacity', 0.8)
+  //     .on('mouseover', mouseover)
+  //     .on('mouseout', mouseout);
+  // });
+
+  // heatmap
+  //   .append('text')
+  //   .attr('x', 0)
+  //   .attr('y', -60)
+  //   .style('font-size', '25px')
+  //   .text('Heatmap of percent homeless population for each variable');
+
+  // heatmap
+  //   .append('text')
+  //   .attr('x', 0)
+  //   .attr('y', -30)
+  //   .attr('text-anchor', 'left')
+  //   .style('font-size', '15px')
+  //   .style('fill', 'grey')
+  //   .text('Top 10 states with the highest homeless population');
+
+
   </script>
 </html>
 
@@ -718,8 +842,7 @@
           <section class="wrapper style1 align-center">
             <div class="inner">
               <h2>Diverging Bar Chart</h2>
-              <p>Diverging bar chart illustrates the percentage change in the homeless population for each state from 2012 to 2013. It is evident from the chart that North Dakota experienced the most substantial increase in homeless population. The upward trend is denoted by blue, while decreases are represented in red.
-</p>
+              <p>Diverging bar chart illustrates the percentage change in the homeless population for each state from 2012 to 2013. It is evident from the chart that North Dakota experienced the most substantial increase in homeless population. The upward trend is denoted by blue, while decreases are represented in red.</p>
             </div>
 
 <html>
@@ -733,148 +856,293 @@
     <div id="bar_chart"></div>
   </body>
   <script>
-    // Set the dimensions and margins
-    const barWidth = 1300;
-    const barHeight = 1000;
-    const barmargin = {
-      top: 80,
-      right: 150,
-      bottom: 70,
-      left: 150,
+      const barWidth = 1300;
+  const barHeight = 1000;
+  const barmargin = {
+    top: 80,
+    right: 150,
+    bottom: 70,
+    left: 150,
+  };
+  const barwidth = barWidth - barmargin.left - barmargin.right;
+  const barheight = barHeight - barmargin.top - barmargin.bottom;
+
+  const bar = d3
+    .select('#bar_chart')
+    .append('svg')
+    .attr('width', barWidth)
+    .attr('height', barHeight)
+    .append('g')
+    .attr('transform', `translate(${barmargin.left},${barmargin.top})`);
+
+  const tooltip = d3
+    .select('body')
+    .append('div')
+    .attr('class', 'tooltip')
+    .style('opacity', 0)
+    .style('position', 'absolute')
+    .style('text-align', 'center')
+    .style('padding', '5px')
+    .style('font-size', '12.5px')
+    .style('background', 'white')
+    .style('border-width', '2px')
+    .style('border-radius', '5px');
+
+  bar
+    .append('text')
+    .attr('x', -50)
+    .attr('y', -50)
+    .text('Homelessness Population Change Across different States')
+    .style('font-size', '30px');
+
+  bar
+    .append('text')
+    .attr('x', -50)
+    .attr('y', -20)
+    .attr('text-anchor', 'left')
+    .style('font-size', '20px')
+    .style('fill', 'grey')
+    .text('The difference between the population of an area from 2012-2013');
+
+  d3.csv('https://gist.githubusercontent.com/eunicetu16/a350b68acbd765aff8876d20a41cad60/raw/b2c1779406d01f2979c3d76d37660a95c202be1f/2013_US_State_Statistics.csv', function (d) {
+    return {
+      state: d.State,
+      change: +d['Change from Last Year'],
     };
-    const barwidth = barWidth - barmargin.left - barmargin.right;
-    const barheight = barHeight - barmargin.top - barmargin.bottom;
+  }).then(function (data) {
+    const x = d3
+      .scaleLinear()
+      .domain([-2.1, 2.1])
+      .range([0, barwidth]);
 
-    // Append the svg
-    const bar = d3
-      .select('#bar_chart')
-      .append('svg')
-      .attr('width', barwidth + barmargin.left + barmargin.right)
-      .attr('height', barheight + barmargin.top + barmargin.bottom)
+    bar
       .append('g')
-      .attr(
-        'transform',
-        `translate(${barmargin.left},${barmargin.top})`,
-      );
+      .attr('transform', `translate(0, ${barheight})`)
+      .call(d3.axisBottom(x));
 
-    //Graph Title
     bar
       .append('text')
-      .attr('x', -50)
-      .attr('y', -50)
-      .text(
-        'Homelessness Population Change Across different States',
-      )
-      .style('font-size', '30px');
+      .attr('x', barwidth / 2 - 100)
+      .attr('y', barheight + 50)
+      .style('font-size', '25px')
+      .text('Change From Last Year');
 
-    // Subtitle of graph
+    const y = d3
+      .scaleBand()
+      .domain(data.map((d) => d.state))
+      .range([0, barheight])
+      .padding(0.1);
+
+    bar
+      .append('g')
+      .attr('trandform', `translate(0, 0)`)
+      .call(d3.axisLeft(y));
+
     bar
       .append('text')
-      .attr('x', -50)
-      .attr('y', -20)
-      .attr('text-anchor', 'left')
-      .style('font-size', '20px')
-      .style('fill', 'grey')
-      .text(
-        'The difference between the population of an area from 2012-2013',
-      );
+      .attr('x', -barheight / 2 - 50)
+      .attr('y', -120)
+      .text('State')
+      .style('font-size', '25px')
+      .attr('transform', 'rotate(-90)');
 
-    // Load data
-    d3.csv('https://gist.githubusercontent.com/eunicetu16/a350b68acbd765aff8876d20a41cad60/raw/b2c1779406d01f2979c3d76d37660a95c202be1f/2013_US_State_Statistics.csv', function (d) {
-      return {
-        state: d.State,
-        change: +d['Change from Last Year'],
-      };
-    }).then(function (data) {
-      // X axis
-      const x = d3
-        .scaleLinear()
-        .domain([-2.1, 2.1])
-        .range([0, barwidth]);
+    const colorScale = d3
+      .scaleSequential()
+      .domain([-2.1, 2.1])
+      .interpolator(d3.interpolateRdBu);
 
-      bar
-        .append('g')
-        .attr('transform', `translate(0, ${barheight})`)
-        .call(d3.axisBottom(x));
+    const barScale = d3
+      .scaleLinear()
+      .domain(d3.extent(data, (d) => d.change))
+      .range([0, barwidth / 2]);
 
-      // Add X axis label
-      bar
-        .append('text')
-        .attr('x', barwidth / 2 - 100)
-        .attr('y', barheight + 50)
-        .style('font-size', '25px')
-        .text('Change From Last Year');
+    bar
+      .selectAll('myRect')
+      .data(data)
+      .join('rect')
+      .attr('x', function (d) {
+        if (d.change < 0) {
+          return x(0) - barScale(Math.abs(d.change));
+        } else {
+          return x(0);
+        }
+      })
+      .attr('y', (d) => y(d.state))
+      .attr('height', y.bandwidth())
+      .attr('width', function (d) {
+        return barScale(Math.abs(d.change));
+      })
+      .attr('fill', function (d) {
+        return colorScale(d.change);
+      })
+      .on('mouseover', function (event, d) {
+        tooltip
+          .style('opacity', 1)
+          .html('Change From Last Year: ' + d.change)
+          .style('left', event.pageX + 'px')
+          .style('top', event.pageY - 30 + 'px');
+      })
+      .on('mouseout', function (d) {
+        tooltip.style('opacity', 0);
+      });
 
-      // y axis
-      const y = d3
-        .scaleBand()
-        .domain(data.map((d) => d.state))
-        .range([0, barheight])
-        .padding(0.1);
+    var legend = d3
+      .legendColor()
+      .labelFormat(d3.format('.2f'))
+      .title('Color Legend:')
+      .titleWidth(120)
+      .cells(5)
+      .scale(colorScale);
 
-      bar
-        .append('g')
-        .attr('trandform', `translate(0, 0)`)
-        .call(d3.axisLeft(y));
+    bar
+      .append('g')
+      .attr('class', 'legend')
+      .attr('transform', 'translate(900, -30)')
+      .call(legend);
+  });
 
-      // Add y axis label
-      bar
-        .append('text')
-        .attr('x', -barheight / 2 - 50)
-        .attr('y', -120)
-        .text('State')
-        .style('font-size', '25px')
-        .attr('transform', 'rotate(-90)');
+    // // Set the dimensions and margins
+    // const barWidth = 1300;
+    // const barHeight = 1000;
+    // const barmargin = {
+    //   top: 80,
+    //   right: 150,
+    //   bottom: 70,
+    //   left: 150,
+    // };
+    // const barwidth = barWidth - barmargin.left - barmargin.right;
+    // const barheight = barHeight - barmargin.top - barmargin.bottom;
 
-      // Color scale
-      const colorScale = d3
-        .scaleSequential()
-        .domain([-2.1, 2.1])
-        .interpolator(d3.interpolateRdBu);
+    // // Append the svg
+    // const bar = d3
+    //   .select('#bar_chart')
+    //   .append('svg')
+    //   .attr('width', barwidth + barmargin.left + barmargin.right)
+    //   .attr('height', barheight + barmargin.top + barmargin.bottom)
+    //   .append('g')
+    //   .attr(
+    //     'transform',
+    //     `translate(${barmargin.left},${barmargin.top})`,
+    //   );
 
-      // Bar scale
-      const barScale = d3
-        .scaleLinear()
-        .domain(d3.extent(data, (d) => d.change))
-        .range([0, barwidth / 2]);
+    // //Graph Title
+    // bar
+    //   .append('text')
+    //   .attr('x', -50)
+    //   .attr('y', -50)
+    //   .text(
+    //     'Homelessness Population Change Across different States',
+    //   )
+    //   .style('font-size', '30px');
 
-      //Create Bars
-      bar
-        .selectAll('myRect')
-        .data(data)
-        .join('rect')
-        .attr('x', function (d) {
-          if (d.change < 0) {
-            return x(0) - barScale(Math.abs(d.change));
-          } else {
-            return x(0);
-          }
-        })
-        .attr('y', (d) => y(d.state))
-        .attr('height', y.bandwidth())
+    // // Subtitle of graph
+    // bar
+    //   .append('text')
+    //   .attr('x', -50)
+    //   .attr('y', -20)
+    //   .attr('text-anchor', 'left')
+    //   .style('font-size', '20px')
+    //   .style('fill', 'grey')
+    //   .text(
+    //     'The difference between the population of an area from 2012-2013',
+    //   );
 
-        .attr('width', function (d) {
-          return barScale(Math.abs(d.change));
-        })
-        .attr('fill', function (d) {
-          return colorScale(d.change);
-        });
+    // // Load data
+    // d3.csv('https://gist.githubusercontent.com/eunicetu16/a350b68acbd765aff8876d20a41cad60/raw/b2c1779406d01f2979c3d76d37660a95c202be1f/2013_US_State_Statistics.csv', function (d) {
+    //   return {
+    //     state: d.State,
+    //     change: +d['Change from Last Year'],
+    //   };
+    // }).then(function (data) {
+    //   // X axis
+    //   const x = d3
+    //     .scaleLinear()
+    //     .domain([-2.1, 2.1])
+    //     .range([0, barwidth]);
 
-      //Add Legend
-      var legend = d3
-        .legendColor()
-        .labelFormat(d3.format('.2f'))
-        .title('Color Legend:')
-        .titleWidth(120)
-        .cells(5)
-        .scale(colorScale);
+    //   bar
+    //     .append('g')
+    //     .attr('transform', `translate(0, ${barheight})`)
+    //     .call(d3.axisBottom(x));
 
-      bar
-        .append('g')
-        .attr('class', 'legend')
-        .attr('transform', 'translate(900, -30)')
-        .call(legend);
-    });
+    //   // Add X axis label
+    //   bar
+    //     .append('text')
+    //     .attr('x', barwidth / 2 - 100)
+    //     .attr('y', barheight + 50)
+    //     .style('font-size', '25px')
+    //     .text('Change From Last Year');
+
+    //   // y axis
+    //   const y = d3
+    //     .scaleBand()
+    //     .domain(data.map((d) => d.state))
+    //     .range([0, barheight])
+    //     .padding(0.1);
+
+    //   bar
+    //     .append('g')
+    //     .attr('trandform', `translate(0, 0)`)
+    //     .call(d3.axisLeft(y));
+
+    //   // Add y axis label
+    //   bar
+    //     .append('text')
+    //     .attr('x', -barheight / 2 - 50)
+    //     .attr('y', -120)
+    //     .text('State')
+    //     .style('font-size', '25px')
+    //     .attr('transform', 'rotate(-90)');
+
+    //   // Color scale
+    //   const colorScale = d3
+    //     .scaleSequential()
+    //     .domain([-2.1, 2.1])
+    //     .interpolator(d3.interpolateRdBu);
+
+    //   // Bar scale
+    //   const barScale = d3
+    //     .scaleLinear()
+    //     .domain(d3.extent(data, (d) => d.change))
+    //     .range([0, barwidth / 2]);
+
+    //   //Create Bars
+    //   bar
+    //     .selectAll('myRect')
+    //     .data(data)
+    //     .join('rect')
+    //     .attr('x', function (d) {
+    //       if (d.change < 0) {
+    //         return x(0) - barScale(Math.abs(d.change));
+    //       } else {
+    //         return x(0);
+    //       }
+    //     })
+    //     .attr('y', (d) => y(d.state))
+    //     .attr('height', y.bandwidth())
+
+    //     .attr('width', function (d) {
+    //       return barScale(Math.abs(d.change));
+    //     })
+    //     .attr('fill', function (d) {
+    //       return colorScale(d.change);
+    //     });
+
+    //   //Add Legend
+    //   var legend = d3
+    //     .legendColor()
+    //     .labelFormat(d3.format('.2f'))
+    //     .title('Color Legend:')
+    //     .titleWidth(120)
+    //     .cells(5)
+    //     .scale(colorScale);
+
+    //   bar
+    //     .append('g')
+    //     .attr('class', 'legend')
+    //     .attr('transform', 'translate(900, -30)')
+    //     .call(legend);
+    // });
   </script>
 </html>
 
