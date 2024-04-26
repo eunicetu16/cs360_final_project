@@ -726,7 +726,8 @@
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'central')
       .style('fill', 'black')
-      .text((d) => d.percent + '%');
+      .text((d) => d.percent + '%')
+      .style('font-size', '15px');
   });
 
   heatmap
