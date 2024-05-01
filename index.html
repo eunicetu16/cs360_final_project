@@ -80,7 +80,7 @@
   <body>
     <div id="choropleth_map"></div>
     <script>
-        const mapWidth = 1400;
+const mapWidth = 1400;
   const mapHeight = 700;
   const mapmargin = {
     top: 100,
@@ -165,7 +165,7 @@
     var colorScale = d3
       .scaleThreshold()
       .domain([
-        0, 3000, 5000, 7000, 9000, 10000, 30000, 50000,
+        3000, 5000, 7000, 9000, 10000, 30000, 50000,
         100000, 150000,
       ])
       .range(d3.schemeBlues[9]);
@@ -285,12 +285,12 @@
   <script>
     // Set the dimensions and margins
     const svgWidth = 1400;
-    const svgHeight = 600;
+    const svgHeight = 700;
     const margin = {
       top: 100,
       right: 250,
-      bottom: 50,
-      left: 100,
+      bottom: 100,
+      left: 120,
     };
     const width = svgWidth - margin.left - margin.right;
     const height = svgHeight - margin.top - margin.bottom;
@@ -313,17 +313,17 @@
       .attr('x', 0)
       .attr('y', -40)
       .text(
-        'Number of Homelessness persons for different variables',
+        'Homeless population does not have significant changes',
       )
-      .style('font-size', '25px');
+      .style('font-size', '35px');
 
     // Subtitle of graph
     svg
       .append('text')
       .attr('x', 0)
-      .attr('y', -20)
+      .attr('y', -15)
       .attr('text-anchor', 'left')
-      .style('font-size', '15px')
+      .style('font-size', '20px')
       .style('fill', 'grey')
       .text('from 2005 to 2013');
 
@@ -356,15 +356,19 @@
 
       svg
         .append('g')
+        .attr('class', 'x-axis')
         .attr('transform', `translate(0, ${height})`)
-        .call(d3.axisBottom(x).ticks(8)); // Adjust tick count as needed
+        .call(d3.axisBottom(x).ticks(8)); 
+
+      svg.selectAll('.x-axis text')
+        .style('font-size', '15px');  
 
       // Add X axis label
       svg
         .append('text')
         .attr('x', width / 2)
-        .attr('y', height + 50)
-        .style('font-size', '20px')
+        .attr('y', height + 60)
+        .style('font-size', '22px')
         .text('Year');
 
       // y axis
@@ -379,15 +383,20 @@
         .range([height, 0])
         .nice();
 
-      svg.append('g').call(d3.axisLeft(y));
+      svg.append('g')
+        .attr('class', 'y-axis')
+        .call(d3.axisLeft(y));
+
+      svg.selectAll('.y-axis text')
+        .style('font-size', '15px');
 
       // Add y axis label
       svg
         .append('text')
         .attr('x', -height / 2 - 120)
-        .attr('y', -70)
+        .attr('y', -80)
         .text('Number of Homelessness persons')
-        .style('font-size', '20px')
+        .style('font-size', '22px')
         .attr('transform', 'rotate(-90)');
 
       // Color scale
@@ -475,7 +484,7 @@
             )
             .style('left', event.pageX + 10 + 'px')
             .style('top', event.pageY - 60 + 'px') // Adjusting the vertical position
-            .style('pointer-events', 'none'); // Ensure tooltip doesn't interfere with mouse events on the chart
+            .style('pointer-events', 'none');
         })
         .on('mouseout', function (event, d) {
           tooltip
@@ -589,13 +598,13 @@
     <div id="heatmap"></div>
   </body>
   <script>
-const HmapWidth = 1300;
+const HmapWidth = 1400;
 const HmapHeight = 600;
 const Hmapmargin = {
   top: 100,
   right: 20,
-  bottom: 50,
-  left: 180,
+  bottom: 30,
+  left: 220,
 };
 const Hmapwidth = HmapWidth - Hmapmargin.left - Hmapmargin.right;
 const Hmapheight = HmapHeight - Hmapmargin.top - Hmapmargin.bottom;
@@ -630,9 +639,13 @@ d3.csv(heatmapUrl, function (d) {
 
   heatmap
     .append('g')
+    .attr('class', 'y-axis')
     .call(d3.axisLeft(y).tickSize(0))
     .select('.domain')
     .remove();
+
+  heatmap.selectAll('.y-axis text')
+    .style('font-size', '13px');
 
   const x = d3
     .scaleBand()
@@ -642,11 +655,14 @@ d3.csv(heatmapUrl, function (d) {
 
   heatmap
     .append('g')
-    .style("font", '20px')
+    .attr('class', 'x-axis')
     .attr('transform', `translate(0, ${Hmapheight})`)
     .call(d3.axisBottom(x).tickSize(0))
     .select('.domain')
     .remove();
+
+  heatmap.selectAll('.x-axis text')
+    .style('font-size', '15px');
 
   //Build color scale
   const theresholdScale = d3
@@ -661,7 +677,7 @@ d3.csv(heatmapUrl, function (d) {
   heatmap
     .append('g')
     .attr('class', 'legendSequential')
-    .attr('transform', 'translate(780, -70)');
+    .attr('transform', 'translate(830, -70)');
 
   const legendSequential = d3
     .legendColor()
@@ -734,22 +750,20 @@ d3.csv(heatmapUrl, function (d) {
     .on('mouseout', mouseout);
 });
 
-heatmap.selectAll('.tick text')
-  .style('font-size', '20px');
 
 heatmap
   .append('text')
-  .attr('x', 0)
+  .attr('x', -100)
   .attr('y', -60)
-  .style('font-size', '25px')
+  .style('font-size', '35px')
   .text('Heatmap of percent homeless population for each variable');
 
 heatmap
   .append('text')
-  .attr('x', 0)
+  .attr('x', -100)
   .attr('y', -30)
   .attr('text-anchor', 'left')
-  .style('font-size', '15px')
+  .style('font-size', '20px')
   .style('fill', 'grey')
   .text('Top 10 states with the highest homeless population');
 
@@ -759,8 +773,8 @@ heatmap
           <!-- Seven -->
           <section class="wrapper style1 align-center">
             <div class="inner">
-              <h2>Diverging Bar Chart</h2>
-              <p>Diverging bar chart illustrates the percentage change in the homeless population for each state from 2012 to 2013. It is evident from the chart that North Dakota experienced the most substantial increase in homeless population. The upward trend is denoted by blue, while decreases are represented in red.</p>
+              <h2>How did the trends in the homeless population vary across different states in the United States from 2012 to 2013?</h2>
+              <p>Diverging bar chart illustrates the percentage change in the homeless population for each state from 2012 to 2013. It is evident from the chart that North Dakota experienced the most substantial increase in homeless population. The upward trend is denoted by blue, while decreases are represented in red. Most of the states have the trends within -0.5 and 0.5, but <strong>North Dakota</strong> had a significant change of 2.0073.</p>
             </div>
 
 <html>
@@ -775,12 +789,12 @@ heatmap
   </body>
   <script>
     const barWidth = 1300;
-    const barHeight = 1000;
+    const barHeight = 1100;
     const barmargin = {
     top: 80,
     right: 150,
     bottom: 70,
-    left: 150,
+    left: 180,
   };
   const barwidth = barWidth - barmargin.left - barmargin.right;
   const barheight = barHeight - barmargin.top - barmargin.bottom;
@@ -811,7 +825,7 @@ heatmap
     .attr('x', -50)
     .attr('y', -50)
     .text('Homelessness Population Change Across different States')
-    .style('font-size', '30px');
+    .style('font-size', '35px');
 
   bar
     .append('text')
@@ -835,14 +849,18 @@ heatmap
 
     bar
       .append('g')
+      .attr('class', 'x-axis')
       .attr('transform', `translate(0, ${barheight})`)
       .call(d3.axisBottom(x));
 
+    bar.selectAll('.x-axis text')
+    .style('font-size', '15px');
+
     bar
       .append('text')
-      .attr('x', barwidth / 2 - 100)
+      .attr('x', barwidth / 2 - 120)
       .attr('y', barheight + 50)
-      .style('font-size', '25px')
+      .style('font-size', '22px')
       .text('Change From Last Year');
 
     const y = d3
@@ -853,15 +871,19 @@ heatmap
 
     bar
       .append('g')
+      .attr('class', 'y-axis')
       .attr('transform', `translate(0, 0)`)
       .call(d3.axisLeft(y));
+
+    bar.selectAll('.y-axis text')
+    .style('font-size', '15px');
 
     bar
       .append('text')
       .attr('x', -barheight / 2 - 50)
-      .attr('y', -120)
+      .attr('y', -140)
       .text('State')
-      .style('font-size', '25px')
+      .style('font-size', '22px')
       .attr('transform', 'rotate(-90)');
 
     const colorScale = d3
@@ -872,7 +894,6 @@ heatmap
     const barScale = d3
       .scaleLinear()
       .domain([-2.1, 2.1])
-      //.domain(d3.extent(data, (d) => d.change))
       .range([0, barwidth / 2]);
 
     bar
@@ -883,7 +904,7 @@ heatmap
         return d.change < 0 ? x(d.change) : x(0);
         })
       .attr('width', function (d) {
-        return Math.abs(x(d.change) - x(0)); // Adjusted width calculation
+        return Math.abs(x(d.change) - x(0)); 
         })
 
 
@@ -918,150 +939,47 @@ heatmap
       .call(legend);
   });
 
-    // // Set the dimensions and margins
-    // const barWidth = 1300;
-    // const barHeight = 1000;
-    // const barmargin = {
-    //   top: 80,
-    //   right: 150,
-    //   bottom: 70,
-    //   left: 150,
-    // };
-    // const barwidth = barWidth - barmargin.left - barmargin.right;
-    // const barheight = barHeight - barmargin.top - barmargin.bottom;
-
-    // // Append the svg
-    // const bar = d3
-    //   .select('#bar_chart')
-    //   .append('svg')
-    //   .attr('width', barwidth + barmargin.left + barmargin.right)
-    //   .attr('height', barheight + barmargin.top + barmargin.bottom)
-    //   .append('g')
-    //   .attr(
-    //     'transform',
-    //     `translate(${barmargin.left},${barmargin.top})`,
-    //   );
-
-    // //Graph Title
-    // bar
-    //   .append('text')
-    //   .attr('x', -50)
-    //   .attr('y', -50)
-    //   .text(
-    //     'Homelessness Population Change Across different States',
-    //   )
-    //   .style('font-size', '30px');
-
-    // // Subtitle of graph
-    // bar
-    //   .append('text')
-    //   .attr('x', -50)
-    //   .attr('y', -20)
-    //   .attr('text-anchor', 'left')
-    //   .style('font-size', '20px')
-    //   .style('fill', 'grey')
-    //   .text(
-    //     'The difference between the population of an area from 2012-2013',
-    //   );
-
-    // // Load data
-    // d3.csv('https://gist.githubusercontent.com/eunicetu16/a350b68acbd765aff8876d20a41cad60/raw/b2c1779406d01f2979c3d76d37660a95c202be1f/2013_US_State_Statistics.csv', function (d) {
-    //   return {
-    //     state: d.State,
-    //     change: +d['Change from Last Year'],
-    //   };
-    // }).then(function (data) {
-    //   // X axis
-    //   const x = d3
-    //     .scaleLinear()
-    //     .domain([-2.1, 2.1])
-    //     .range([0, barwidth]);
-
-    //   bar
-    //     .append('g')
-    //     .attr('transform', `translate(0, ${barheight})`)
-    //     .call(d3.axisBottom(x));
-
-    //   // Add X axis label
-    //   bar
-    //     .append('text')
-    //     .attr('x', barwidth / 2 - 100)
-    //     .attr('y', barheight + 50)
-    //     .style('font-size', '25px')
-    //     .text('Change From Last Year');
-
-    //   // y axis
-    //   const y = d3
-    //     .scaleBand()
-    //     .domain(data.map((d) => d.state))
-    //     .range([0, barheight])
-    //     .padding(0.1);
-
-    //   bar
-    //     .append('g')
-    //     .attr('trandform', `translate(0, 0)`)
-    //     .call(d3.axisLeft(y));
-
-    //   // Add y axis label
-    //   bar
-    //     .append('text')
-    //     .attr('x', -barheight / 2 - 50)
-    //     .attr('y', -120)
-    //     .text('State')
-    //     .style('font-size', '25px')
-    //     .attr('transform', 'rotate(-90)');
-
-    //   // Color scale
-    //   const colorScale = d3
-    //     .scaleSequential()
-    //     .domain([-2.1, 2.1])
-    //     .interpolator(d3.interpolateRdBu);
-
-    //   // Bar scale
-    //   const barScale = d3
-    //     .scaleLinear()
-    //     .domain(d3.extent(data, (d) => d.change))
-    //     .range([0, barwidth / 2]);
-
-    //   //Create Bars
-    //   bar
-    //     .selectAll('myRect')
-    //     .data(data)
-    //     .join('rect')
-    //     .attr('x', function (d) {
-    //       if (d.change < 0) {
-    //         return x(0) - barScale(Math.abs(d.change));
-    //       } else {
-    //         return x(0);
-    //       }
-    //     })
-    //     .attr('y', (d) => y(d.state))
-    //     .attr('height', y.bandwidth())
-
-    //     .attr('width', function (d) {
-    //       return barScale(Math.abs(d.change));
-    //     })
-    //     .attr('fill', function (d) {
-    //       return colorScale(d.change);
-    //     });
-
-    //   //Add Legend
-    //   var legend = d3
-    //     .legendColor()
-    //     .labelFormat(d3.format('.2f'))
-    //     .title('Color Legend:')
-    //     .titleWidth(120)
-    //     .cells(5)
-    //     .scale(colorScale);
-
-    //   bar
-    //     .append('g')
-    //     .attr('class', 'legend')
-    //     .attr('transform', 'translate(900, -30)')
-    //     .call(legend);
-    // });
   </script>
 </html>
+        <div class="index align-left">
+
+                <!-- Unordered List -->
+                  <section>
+                    <header>
+                      <h3>Credits</h3>
+                    </header>
+                    <div class="content">
+        
+                      <h4>Data Source</h4>
+                      <ul>
+                        <li><a href="https://github.com/ali-ce/datasets/blob/master/Homelessness-in-USA/2013%20US%20State%20Statistics.csv">2013 US State Statistics</a></li>
+                        <li><a href="https://github.com/ali-ce/datasets/blob/master/Homelessness-in-USA/State%20Homelessness%20Breakdown.csv">State Homelessness Breakdown</a></li>
+                        <li><a href="https://github.com/ali-ce/datasets/blob/master/Homelessness-in-USA/Yearly%20National%20Statistics.csv">Yearly National Statistics</a></li>
+                      </ul>
+                        <header>
+                          <h4>References</h4>
+                        </header>
+                      <ul>
+                        <li><a href="https://endhomelessness.org/resource/archived-state-of-homelessness/">National Alliance to END HOMELESSNESS</a></li>
+                        <li><a href="https://colorbrewer2.org/#type=sequential&scheme=BuGn&n=3">ColorBrewer</a></li>
+                        <li><a href="https://d3js.org/">D3 by Observable</a></li>
+                      </ul>
+                    </div>
+                  </section>
+                  <section>
+                    <header>
+                    </header>
+                    <div class="content">
+
+                      <p>This is <b>bold</b> and this is <strong>strong</strong>. This is <i>italic</i> and this is <em>emphasized</em>.
+                      This is <sup>superscript</sup> text and this is <sub>subscript</sub> text.
+                      This is <u>underlined</u> and this is code: <code>for (;;) { ... }</code>.
+                      Finally, this is a <a href="#">link</a>.</p>
+
+                    </div>
+                  </section>
+
+
 
 				<!-- Footer -->
 					<footer class="wrapper style1 align-center">
