@@ -49,8 +49,8 @@
 				<!-- Three -->
           <section class="wrapper style1 align-center">
             <div class="inner">
-              <h2>Interactive Choropleth Map</h2>
-              <p>The Choropleth Map of the United States offers a visual representation of homelessness, with a sequential color scale indicating the total number of homeless individuals in each state. Hovering over a state reveals detailed information. The map highlights higher concentrations of homelessness in both the western and eastern regions of the country, prompting reflection on regional disparities and the need for comprehensive solutions.</p>
+              <h2>Which state has the highest total number of homeless persons in 2012?</h2>
+              <p>The Choropleth Map of the United States provides a compelling visual narrative of homelessness across the nation, serving as a crucial tool in understanding the distribution and magnitude of this societal issue. Through its sequential color scale, the map vividly illustrates the varying degrees of homelessness prevalent in different states. Notably, states such as <strong>California</strong> and <strong> New York</strong> emerge as focal points, exhibiting significantly higher concentrations of homelessness compared to others. These findings beckon a deeper examination of the socioeconomic factors contributing to homelessness within these regions, including housing affordability, access to social services, and economic disparities. Moreover, the stark regional disparities underscore the pressing need for holistic and region-specific solutions to address homelessness effectively. As policymakers and advocates delve into these intricacies, the Choropleth Map stands as a poignant reminder of the urgency in combating homelessness and striving towards a more equitable society for all.</p>
             </div>
 
 <html>
@@ -137,9 +137,9 @@
     .attr('y', -60)
     .attr('fill', 'black')
     .text(
-      'Choropleth Map - Homeless Population in 2021 in the United States',
+      'California and New York had extremely high homeless population',
     )
-    .style('font-size', '30px');
+    .style('font-size', '35px');
 
   // Subtitle of graph
   chart
@@ -147,10 +147,10 @@
     .attr('x', -100)
     .attr('y', -30)
     .attr('text-anchor', 'left')
-    .style('font-size', '18px')
+    .style('font-size', '20px')
     .style('fill', 'grey')
     .text(
-      'Which state has the highest total number of homeless persons?',
+      'Homelessness Distribution',
     );
 
   d3.csv(
@@ -164,12 +164,12 @@
   ).then(function (data) {
     var colorScale = d3
       .scaleThreshold()
-      //.scaleQuantize()
       .domain([
-        3000, 5000, 7000, 9000, 10000, 30000, 50000,
+        0, 3000, 5000, 7000, 9000, 10000, 30000, 50000,
         100000, 150000,
       ])
       .range(d3.schemeBlues[9]);
+
 
     d3.json(
       'https://gist.githubusercontent.com/eunicetu16/7d60c3fb3c6951e39c46261769395b23/raw/bb15b94c838154bd6b2285b24eece70125ee11d3/us-states.json',
@@ -208,20 +208,20 @@
         .style('stroke', 'black')
 
         .on('mouseover', function (event, d) {
-          maptooltip
-            .transition()
-            .duration(200)
-            .style('opacity', 0.85);
-          maptooltip
-            .html(
-              d.properties.name +
-                '<br/>' +
-                'Homeless Population: ' +
-                d.properties.value,
-            )
-            .style('left', event.pageX + 10 + 'px')
-            .style('top', event.pageY - 60 + 'px');
-        })
+    maptooltip
+        .transition()
+        .duration(200)
+        .style('opacity', 0.85);
+    maptooltip
+        .html(
+            d.properties.name +
+            '<br/>' +
+            'Homeless Population: ' +
+            d.properties.value.toLocaleString(), // Format number with commas
+        )
+        .style('left', event.pageX + 10 + 'px')
+        .style('top', event.pageY - 60 + 'px');
+})
         .on('mouseout', function (event, d) {
           maptooltip
             .transition()
@@ -234,6 +234,7 @@
         .attr('class', 'legendQuant')
         .attr('transform', `translate(900, 0)`);
 
+
       var legendQuant = d3
         .legendColor()
         .shapeWidth(30)
@@ -242,6 +243,7 @@
         .scale(colorScale)
         .title('Homeless Population:')
         .titleWidth(200);
+
 
       chart.select('.legendQuant').call(legendQuant);
     });
@@ -266,7 +268,7 @@
 					<!-- Five -->
 					<section class="wrapper style1 align-center">
 						<div class="inner">
-							<h2>Multi-Line Chart with Time-serires</h2>
+							<h2>How does the variable of homelessness change over times?</h2>
 							<p>The multi-line chart succinctly encapsulates the trajectory of homelessness in the United States across various variables from <strong>2005 to 2013</strong>. Each line represents a distinct variable, offering a comprehensive overview of the trends over the specified period. The visualization allows for easy comparison and identification of patterns, shedding light on the evolving landscape of homelessness in the nation. From demographic shifts to policy impacts, the chart serves as a valuable tool for understanding the complex dynamics influencing homelessness over time.</p>
 						</div>
 
@@ -466,7 +468,7 @@
                 ', Homeless Population' +
                 '</br>' +
                 'was ' +
-                d.homelessness +
+                d.homelessness.toLocaleString() +
                 ' for ' +
                 d.variable +
                 '.',
@@ -569,7 +571,7 @@
           <!-- Six -->
 					<section class="wrapper style1 align-center">
 						<div class="inner">
-							<h2>Heatmap</h2>
+							<h2>Which variable is driven the homeless population?</h2>
 							<p>The comprehensive analysis identifies the top 10 states with the highest homeless population across various variables. This breakdown offers valuable insights into the specific challenges faced by different demographic groups and highlights geographic hotspots where homelessness is particularly acute. By pinpointing these states, policymakers and stakeholders can prioritize resources and interventions to address the diverse needs of homeless populations across the country, fostering more targeted and effective solutions.
                 <br>
                 <br>
@@ -587,302 +589,169 @@
     <div id="heatmap"></div>
   </body>
   <script>
-  const HmapWidth = 1300;
-  const HmapHeight = 600;
-  const Hmapmargin = {
-    top: 80,
-    right: 20,
-    bottom: 50,
-    left: 80,
+const HmapWidth = 1300;
+const HmapHeight = 600;
+const Hmapmargin = {
+  top: 100,
+  right: 20,
+  bottom: 50,
+  left: 180,
+};
+const Hmapwidth = HmapWidth - Hmapmargin.left - Hmapmargin.right;
+const Hmapheight = HmapHeight - Hmapmargin.top - Hmapmargin.bottom;
+
+const heatmap = d3
+  .select('#heatmap')
+  .append('svg')
+  .attr('width', HmapWidth)
+  .attr('height', HmapHeight)
+  .append('g')
+  .attr('transform', `translate(${Hmapmargin.left},${Hmapmargin.top})`);
+
+const heatmapUrl =
+  'https://gist.githubusercontent.com/eunicetu16/a2d1d82e473376eb6f542fb42f814330/raw/a2bebada2d48db13a3cf3ad1a039e874b74780cd/Top_10_homeless_pop.csv';
+
+d3.csv(heatmapUrl, function (d) {
+  return {
+    variable: d.Variable,
+    state: d.State,
+    percent: d.Percentage,
   };
-  const Hmapwidth = HmapWidth - Hmapmargin.left - Hmapmargin.right;
-  const Hmapheight = HmapHeight - Hmapmargin.top - Hmapmargin.bottom;
-
-  const heatmap = d3
-    .select('#heatmap')
-    .append('svg')
-    .attr('width', HmapWidth)
-    .attr('height', HmapHeight)
-    .append('g')
-    .attr('transform', `translate(${Hmapmargin.left},${Hmapmargin.top})`);
-
-  const heatmapUrl =
-    'https://gist.githubusercontent.com/eunicetu16/a2d1d82e473376eb6f542fb42f814330/raw/a2bebada2d48db13a3cf3ad1a039e874b74780cd/Top_10_homeless_pop.csv';
-
-  d3.csv(heatmapUrl, function (d) {
-    return {
-      variable: d.Variable,
-      state: d.State,
-      percent: d.Percentage,
-    };
-  }).then(function (data) {
-    data.forEach((d) => {
-      d.percent = +d.percent;
-    });
-
-    const x = d3
-      .scaleBand()
-      .range([0, Hmapwidth])
-      .domain(data.map((d) => d.variable))
-      .padding(0.01);
-
-    heatmap
-      .append('g')
-      .attr('transform', `translate(0, ${Hmapheight})`)
-      .call(d3.axisBottom(x).tickSize(0))
-      .select('.domain')
-      .remove();
-
-    const y = d3
-      .scaleBand()
-      .range([Hmapheight, 0])
-      .domain(data.map((d) => d.state))
-      .padding(0.05);
-
-    heatmap
-      .append('g')
-      .call(d3.axisLeft(y).tickSize(0))
-      .select('.domain')
-      .remove();
-
-      // Build color scale
-      const theresholdScale = d3
-        .scaleThreshold(d3.interpolateBlues)
-        .domain([10, 30, 50, 70, 90])
-        .range(
-          d3.range(5).map(function (i) {
-            return d3.interpolateBlues(i / 5);
-          }),
-        );
-
-      heatmap
-        .append('g')
-        .attr('class', 'legendSequential')
-        .attr('transform', 'translate(875, -60)');
-
-      const legendSequential = d3
-        .legendColor()
-        .shapeWidth(60)
-        .orient('horizontal')
-        .labelFormat(d3.format('.0f'))
-        .scale(theresholdScale)
-        .title('% Homeless Population:');
-
-      heatmap
-        .select('.legendSequential')
-        .call(legendSequential);
-      heatmap.selectAll('.label').style('font-size', '10px');
-      heatmap
-        .selectAll('.legendTitle')
-        .attr('font-size', '12px');
-
-    const colorScale = d3
-      .scaleSequential(d3.interpolateBlues)
-      .domain([0, d3.max(data, (d) => d.percent)]);
-
-      const tooltip = d3
-      .select('body')
-      .append('div')
-      .attr('class', 'tooltip')
-      .style('opacity', 0)
-      .style('position', 'absolute')
-      .style('text-align', 'center')
-      .style('padding', '5px')
-      .style('font-size', '12.5px')
-      .style('background', 'white')
-      .style('border-width', '2px')
-      .style('border-radius', '5px');
-    heatmap
-      .selectAll()
-      .data(data, function (d) {
-        return d.state + ':' + d.variable;
-      })
-      .enter()
-      .append('rect')
-      .attr('x', (d) => x(d.variable))
-      .attr('y', (d) => y(d.state))
-      .attr('rx', 4)
-      .attr('ry', 4)
-      .attr('width', x.bandwidth())
-      .attr('height', y.bandwidth())
-      .style('fill', (d) => colorScale(d.percent))
-      .style('stroke-width', 4)
-      .style('stroke', 'none')
-      .style('opacity', 0.8)
-      .on('mouseover', function (event, d) {
-        tooltip
-          .style('opacity', 1)
-          .html(
-            'State: ' + d.state +
-            '</br>' +
-            'Variable: ' + d.variable + 
-            '</br>' +
-            'Percent of Homeless Population: ' + d.percent + '%')
-          .style('left', event.pageX + 'px')
-          .style('top', event.pageY - 30 + 'px');
-      })
-      .on('mouseout', function (d) {
-        tooltip.style('opacity', 0);
-      });
-
-    heatmap
-      .selectAll('.percent-text')
-      .data(data, function (d) {
-        return d.state + ':' + d.variable;
-      })
-      .enter()
-      .append('text')
-      .attr('class', 'percent-text')
-      .attr('x', (d) => x(d.variable) + x.bandwidth() / 2)
-      .attr('y', (d) => y(d.state) + y.bandwidth() / 2)
-      .attr('text-anchor', 'middle')
-      .attr('dominant-baseline', 'central')
-      .style('fill', 'black')
-      .text((d) => d.percent + '%')
-      .style('font-size', '15px');
+}).then(function (data) {
+  data.forEach((d) => {
+    d.percent = +d.percent;
   });
 
-  heatmap
-    .append('text')
-    .attr('x', 0)
-    .attr('y', -60)
-    .style('font-size', '25px')
-    .text('Heatmap of percent homeless population for each variable');
+  const y = d3
+    .scaleBand()
+    .range([0, Hmapheight])
+    .domain(data.map((d) => d.variable))
+    .padding(0.01);
 
   heatmap
-    .append('text')
-    .attr('x', 0)
-    .attr('y', -30)
-    .attr('text-anchor', 'left')
-    .style('font-size', '15px')
-    .style('fill', 'grey')
-    .text('Top 10 states with the highest homeless population');
+    .append('g')
+    .call(d3.axisLeft(y).tickSize(0))
+    .select('.domain')
+    .remove();
 
+  const x = d3
+    .scaleBand()
+    .range([0, Hmapwidth])
+    .domain(data.map((d) => d.state))
+    .padding(0.01);
 
-  // const HmapWidth = 1300;
-  // const HmapHeight = 500;
-  // const Hmapmargin = {
-  //   top: 80,
-  //   right: 20,
-  //   bottom: 50,
-  //   left: 100,
-  // };
-  // const Hmapwidth = HmapWidth - Hmapmargin.left - Hmapmargin.right;
-  // const Hmapheight = HmapHeight - Hmapmargin.top - Hmapmargin.bottom;
+  heatmap
+    .append('g')
+    .style("font", '20px')
+    .attr('transform', `translate(0, ${Hmapheight})`)
+    .call(d3.axisBottom(x).tickSize(0))
+    .select('.domain')
+    .remove();
 
-  // const heatmap = d3
-  //   .select('#heatmap')
-  //   .append('svg')
-  //   .attr('width', HmapWidth)
-  //   .attr('height', HmapHeight)
-  //   .append('g')
-  //   .attr('transform', `translate(${Hmapmargin.left},${Hmapmargin.top})`);
+  //Build color scale
+  const theresholdScale = d3
+    .scaleThreshold(d3.interpolateBlues)
+    .domain([10, 30, 50, 70, 90])
+    .range(
+      d3.range(5).map(function (i) {
+        return d3.interpolateBlues(i / 5);
+      }),
+    );
 
-  // const heatmapUrl =
-  //   'https://gist.githubusercontent.com/eunicetu16/a2d1d82e473376eb6f542fb42f814330/raw/a2bebada2d48db13a3cf3ad1a039e874b74780cd/Top_10_homeless_pop.csv';
+  heatmap
+    .append('g')
+    .attr('class', 'legendSequential')
+    .attr('transform', 'translate(780, -70)');
 
-  // d3.csv(heatmapUrl, function (d) {
-  //   return {
-  //     variable: d.Variable,
-  //     state: d.State,
-  //     percent: d.Percentage,
-  //   };
-  // }).then(function (data) {
-  //   data.forEach((d) => {
-  //     d.percent = +d.percent;
-  //   });
+  const legendSequential = d3
+    .legendColor()
+    .shapeWidth(60)
+    .orient('horizontal')
+    .labelFormat(d3.format('.0f'))
+    .scale(theresholdScale)
+    .title('% Homeless Population:');
 
-  //   const x = d3
-  //     .scaleBand()
-  //     .range([0, Hmapwidth])
-  //     .domain(data.map((d) => d.variable))
-  //     .padding(0.01);
+  heatmap
+    .select('.legendSequential')
+    .call(legendSequential);
+  heatmap.selectAll('.label').style('font-size', '15px');
+  heatmap
+    .selectAll('.legendTitle')
+    .attr('font-size', '18px');
 
-  //   heatmap
-  //     .append('g')
-  //     .attr('transform', `translate(0, ${Hmapheight})`)
-  //     .call(d3.axisBottom(x).tickSize(0))
-  //     .select('.domain')
-  //     .remove();
+  const colorScale = d3
+    .scaleSequential(d3.interpolateBlues)
+    .domain([0, d3.max(data, (d) => +d.percent)]);
 
-  //   const y = d3
-  //     .scaleBand()
-  //     .range([Hmapheight, 0])
-  //     .domain(data.map((d) => d.state))
-  //     .padding(0.05);
+  const tooltip = d3
+    .select('body')
+    .append('div')
+    .attr('class', 'tooltip')
+    .style('opacity', 0)
+    .style('position', 'absolute')
+    .style('text-align', 'center')
+    .style('padding', '5px')
+    .style('font-size', '12.5px')
+    .style('background', 'white')
+    .style('border-width', '2px')
+    .style('border-radius', '5px');
 
-  //   heatmap
-  //     .append('g')
-  //     .call(d3.axisLeft(y).tickSize(0))
-  //     .select('.domain')
-  //     .remove();
+  const mouseover = function (event, d) {
+    tooltip
+      .style('opacity', 1)
+      .html(
+        'State: ' + d.state +
+        '</br>' +
+        'Variable: ' + d.variable +
+        '</br>' +
+        'Percent of Homeless Population: ' + +d.percent + '%')
+      .style('left', event.pageX + 'px')
+      .style('top', event.pageY - 30 + 'px');
+  };
 
-  //   const colorScale = d3
-  //     .scaleSequential(d3.interpolateBlues)
-  //     .domain([0, d3.max(data, (d) => d.percent)]);
+  const mouseout = function (d) {
+    tooltip.style('opacity', 0);
+  };
 
-  //   const tooltip = d3
-  //     .select('body')
-  //     .append('div')
-  //     .attr('class', 'tooltip')
-  //     .style('opacity', 0)
-  //     .style('position', 'absolute')
-  //     .style('text-align', 'center')
-  //     .style('padding', '5px')
-  //     .style('font-size', '12.5px')
-  //     .style('background', 'white')
-  //     .style('border-width', '2px')
-  //     .style('border-radius', '5px');
+  heatmap
+    .selectAll()
+    .data(data, function (d) {
+      return d.state + ':' + d.variable;
+    })
+    .enter()
+    .append('rect')
+    .attr('x', (d) => x(d.state))
+    .attr('y', (d) => y(d.variable))
+    .attr('rx', 4)
+    .attr('ry', 4)
+    .attr('width', x.bandwidth())
+    .attr('height', y.bandwidth())
+    .style('fill', (d) => colorScale(+d.percent))
+    .style('stroke-width', 4)
+    .style('stroke', 'none')
+    .style('opacity', 0.8)
+    .on('mouseover', mouseover)
+    .on('mouseout', mouseout);
+});
 
-  //   const mouseover = function (event, d) {
-  //     tooltip
-  //       .style('opacity', 1)
-  //       .html('Percent Homeless Population: ' + d.percent + '%')
-  //       .style('left', event.pageX + 'px')
-  //       .style('top', event.pageY - 30 + 'px');
-  //   };
+heatmap.selectAll('.tick text')
+  .style('font-size', '20px');
 
-  //   const mouseout = function (d) {
-  //     tooltip.style('opacity', 0);
-  //   };
+heatmap
+  .append('text')
+  .attr('x', 0)
+  .attr('y', -60)
+  .style('font-size', '25px')
+  .text('Heatmap of percent homeless population for each variable');
 
-  //   heatmap
-  //     .selectAll()
-  //     .data(data, function (d) {
-  //       return d.state + ':' + d.variable;
-  //     })
-  //     .enter()
-  //     .append('rect')
-  //     .attr('x', (d) => x(d.variable))
-  //     .attr('y', (d) => y(d.state))
-  //     .attr('rx', 4)
-  //     .attr('ry', 4)
-  //     .attr('width', x.bandwidth())
-  //     .attr('height', y.bandwidth())
-  //     .style('fill', (d) => colorScale(d.percent))
-  //     .style('stroke-width', 4)
-  //     .style('stroke', 'none')
-  //     .style('opacity', 0.8)
-  //     .on('mouseover', mouseover)
-  //     .on('mouseout', mouseout);
-  // });
-
-  // heatmap
-  //   .append('text')
-  //   .attr('x', 0)
-  //   .attr('y', -60)
-  //   .style('font-size', '25px')
-  //   .text('Heatmap of percent homeless population for each variable');
-
-  // heatmap
-  //   .append('text')
-  //   .attr('x', 0)
-  //   .attr('y', -30)
-  //   .attr('text-anchor', 'left')
-  //   .style('font-size', '15px')
-  //   .style('fill', 'grey')
-  //   .text('Top 10 states with the highest homeless population');
-
+heatmap
+  .append('text')
+  .attr('x', 0)
+  .attr('y', -30)
+  .attr('text-anchor', 'left')
+  .style('font-size', '15px')
+  .style('fill', 'grey')
+  .text('Top 10 states with the highest homeless population');
 
   </script>
 </html>
@@ -905,9 +774,9 @@
     <div id="bar_chart"></div>
   </body>
   <script>
-      const barWidth = 1300;
-  const barHeight = 1000;
-  const barmargin = {
+    const barWidth = 1300;
+    const barHeight = 1000;
+    const barmargin = {
     top: 80,
     right: 150,
     bottom: 70,
@@ -984,7 +853,7 @@
 
     bar
       .append('g')
-      .attr('trandform', `translate(0, 0)`)
+      .attr('transform', `translate(0, 0)`)
       .call(d3.axisLeft(y));
 
     bar
@@ -1002,7 +871,8 @@
 
     const barScale = d3
       .scaleLinear()
-      .domain(d3.extent(data, (d) => d.change))
+      .domain([-2.1, 2.1])
+      //.domain(d3.extent(data, (d) => d.change))
       .range([0, barwidth / 2]);
 
     bar
@@ -1010,17 +880,15 @@
       .data(data)
       .join('rect')
       .attr('x', function (d) {
-        if (d.change < 0) {
-          return x(0) - barScale(Math.abs(d.change));
-        } else {
-          return x(0);
-        }
-      })
+        return d.change < 0 ? x(d.change) : x(0);
+        })
+      .attr('width', function (d) {
+        return Math.abs(x(d.change) - x(0)); // Adjusted width calculation
+        })
+
+
       .attr('y', (d) => y(d.state))
       .attr('height', y.bandwidth())
-      .attr('width', function (d) {
-        return barScale(Math.abs(d.change));
-      })
       .attr('fill', function (d) {
         return colorScale(d.change);
       })
