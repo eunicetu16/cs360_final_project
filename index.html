@@ -80,174 +80,342 @@
   <body>
     <div id="choropleth_map"></div>
     <script>
-const mapWidth = 1400;
-  const mapHeight = 700;
-  const mapmargin = {
-    top: 100,
-    right: 100,
-    bottom: 50,
-    left: 200,
-  };
-  const mapwidth =
-    mapWidth - mapmargin.left - mapmargin.right;
-  const mapheight =
-    mapHeight - mapmargin.top - mapmargin.bottom;
+      const mapWidth = 1400;
+const mapHeight = 700;
+const mapmargin = {
+  top: 100,
+  right: 100,
+  bottom: 50,
+  left: 200,
+};
+const mapwidth = mapWidth - mapmargin.left - mapmargin.right;
+const mapheight = mapHeight - mapmargin.top - mapmargin.bottom;
 
-  var projection = d3
-    .geoAlbersUsa()
-    .translate([mapwidth / 2 - 200, mapheight / 2])
-    .scale([1250]);
-  var path = d3.geoPath().projection(projection);
+var projection = d3
+  .geoAlbersUsa()
+  .translate([mapwidth / 2 - 200, mapheight / 2])
+  .scale([1250]);
+var path = d3.geoPath().projection(projection);
 
-  // Creating the svg element
-  const mapsvg = d3
-    .select('#choropleth_map')
-    .append('svg')
-    .attr('width', mapWidth)
-    .attr('height', mapHeight);
+// Creating the svg element
+const mapsvg = d3
+  .select('#choropleth_map')
+  .append('svg')
+  .attr('width', mapWidth)
+  .attr('height', mapHeight);
 
-  // Creating the Chart
-  const chart = mapsvg
-    .append('g')
-    .attr(
-      'transform',
-      `translate(${mapmargin.left},${mapmargin.top})`,
-    );
+// Creating the Chart
+const chart = mapsvg
+  .append('g')
+  .attr('transform', `translate(${mapmargin.left},${mapmargin.top})`);
 
-  // Tooltip
-  const maptooltip = d3
-    .select('body')
-    .append('div')
-    .attr('class', 'maptooltip')
-    .style('opacity', 0)
-    .style('position', 'absolute')
-    .style('text-align', 'center')
-    .style('padding', '5px')
-    .style('font-size', '12.5px')
-    .style('background', 'rgb(231, 231, 229)')
-    .style('border', '0px')
-    .style('border-radius', '6px')
-    .style('pointer-events', 'none');
+// Tooltip
+const maptooltip = d3
+  .select('body')
+  .append('div')
+  .attr('class', 'maptooltip')
+  .style('opacity', 0)
+  .style('position', 'absolute')
+  .style('text-align', 'center')
+  .style('padding', '5px')
+  .style('font-size', '12.5px')
+  .style('background', 'rgb(231, 231, 229)')
+  .style('border', '0px')
+  .style('border-radius', '6px')
+  .style('pointer-events', 'none');
 
-  // Add title
-  chart
-    .append('text')
-    .attr('class', 'Title')
-    .attr('x', -100)
-    .attr('y', -60)
-    .attr('fill', 'black')
-    .text(
-      'California and New York had extremely high homeless population',
-    )
-    .style('font-size', '35px');
+// Add title
+chart
+  .append('text')
+  .attr('class', 'Title')
+  .attr('x', -100)
+  .attr('y', -60)
+  .attr('fill', 'black')
+  .text(
+    'California and New York had extremely high homeless population',
+  )
+  .style('font-size', '35px');
 
-  // Subtitle of graph
-  chart
-    .append('text')
-    .attr('x', -100)
-    .attr('y', -30)
-    .attr('text-anchor', 'left')
-    .style('font-size', '20px')
-    .style('fill', 'grey')
-    .text(
-      'Homelessness Distribution',
-    );
+// Subtitle of graph
+chart
+  .append('text')
+  .attr('x', -100)
+  .attr('y', -30)
+  .attr('text-anchor', 'left')
+  .style('font-size', '20px')
+  .style('fill', 'grey')
+  .text('Homelessness Distribution');
 
-  d3.csv(
-    'https://gist.githubusercontent.com/eunicetu16/dfa96a1c1723bdf0d60bc6d1449fcf3e/raw/abe6d3f353d620eb0808545aed1660a8f2a3616f/2013_homelesspop.csv',
-    function (d) {
-      return {
-        state: d.State,
-        homeless: +d.Total_Homeless_Persons,
-      };
-    },
-  ).then(function (data) {
-    var colorScale = d3
-      .scaleThreshold()
-      .domain([
-        3000, 5000, 7000, 9000, 10000, 30000, 50000,
-        100000, 150000,
-      ])
-      .range(d3.schemeBlues[9]);
+d3.csv(
+  'https://gist.githubusercontent.com/eunicetu16/dfa96a1c1723bdf0d60bc6d1449fcf3e/raw/abe6d3f353d620eb0808545aed1660a8f2a3616f/2013_homelesspop.csv',
+  function (d) {
+    return {
+      state: d.State,
+      homeless: +d.Total_Homeless_Persons,
+    };
+  },
+).then(function (data) {
+  var thresholds = [
+    0, 3000, 5000, 7000, 9000, 10000, 30000, 50000, 100000, 150000
+  ];
 
+  var colorScale = d3
+    .scaleThreshold()
+    .domain(thresholds)
+    .range(d3.schemeBlues[9]);
 
-    d3.json(
-      'https://gist.githubusercontent.com/eunicetu16/7d60c3fb3c6951e39c46261769395b23/raw/bb15b94c838154bd6b2285b24eece70125ee11d3/us-states.json',
-    ).then(function (json) {
-      for (var i = 0; i < data.length; i++) {
-        //state name
-        var dataState = data[i].state;
-        var homelessdata = data[i].homeless;
+  d3.json(
+    'https://gist.githubusercontent.com/eunicetu16/7d60c3fb3c6951e39c46261769395b23/raw/bb15b94c838154bd6b2285b24eece70125ee11d3/us-states.json',
+  ).then(function (json) {
+    for (var i = 0; i < data.length; i++) {
+      //state name
+      var dataState = data[i].state;
+      var homelessdata = data[i].homeless;
 
-        for (var j = 0; j < json.features.length; j++) {
-          var jsonState =
-            json.features[j].properties.name;
-          if (dataState == jsonState) {
-            json.features[j].properties.value =
-              homelessdata;
-            break;
-          }
+      for (var j = 0; j < json.features.length; j++) {
+        var jsonState = json.features[j].properties.name;
+        if (dataState == jsonState) {
+          json.features[j].properties.value = homelessdata;
+          break;
         }
       }
+    }
 
-       // Bind data and create one path per GeoJSON feature
-      chart
-        .selectAll('path')
-        .data(json.features)
-        .enter()
-        .append('path')
-        .attr('d', path)
-        .style('fill', function (d) {
-          var value = d.properties.value;
-          if (value) {
-            return colorScale(value);
-          } else {
-            return '#CCC';
-          }
-        })
-        .style('stroke', 'black')
+    // Bind data and create one path per GeoJSON feature
+    chart
+      .selectAll('path')
+      .data(json.features)
+      .enter()
+      .append('path')
+      .attr('d', path)
+      .style('fill', function (d) {
+        var value = +d.properties.value;
+        if (value) {
+          return colorScale(value);
+        } else {
+          return '#CCC';
+        }
+      })
+      .style('stroke', 'black')
 
-        .on('mouseover', function (event, d) {
-    maptooltip
-        .transition()
-        .duration(200)
-        .style('opacity', 0.85);
-    maptooltip
-        .html(
+      .on('mouseover', function (event, d) {
+        maptooltip
+          .transition()
+          .duration(200)
+          .style('opacity', 0.85);
+        maptooltip
+          .html(
             d.properties.name +
-            '<br/>' +
-            'Homeless Population: ' +
-            d.properties.value.toLocaleString(), // Format number with commas
-        )
-        .style('left', event.pageX + 10 + 'px')
-        .style('top', event.pageY - 60 + 'px');
-})
-        .on('mouseout', function (event, d) {
-          maptooltip
-            .transition()
-            .duration(500)
-            .style('opacity', 0);
-        });
+              '<br/>' +
+              'Homeless Population: ' +
+              d.properties.value.toLocaleString(), // Format number with commas
+          )
+          .style('left', event.pageX + 10 + 'px')
+          .style('top', event.pageY - 60 + 'px');
+      })
+      .on('mouseout', function (event, d) {
+        maptooltip
+          .transition()
+          .duration(500)
+          .style('opacity', 0);
+      });
 
-      chart
-        .append('g')
-        .attr('class', 'legendQuant')
-        .attr('transform', `translate(900, 0)`);
+    chart
+      .append('g')
+      .attr('class', 'legendQuant')
+      .attr('transform', `translate(900, 0)`);
 
+    var labels = [];
+    for (var i = 1; i < thresholds.length; i++) {
+      labels.push(thresholds[i - 1] + ' - ' + thresholds[i]);
+    };
 
-      var legendQuant = d3
-        .legendColor()
-        .shapeWidth(30)
-        .orient('vertical')
-        .labelFormat(d3.format('.0f'))
-        .scale(colorScale)
-        .title('Homeless Population:')
-        .titleWidth(200);
+    var legendQuant = d3
+      .legendColor()
+      .shapeWidth(30)
+      .orient('vertical')
+      .labelFormat(d3.format('.0f'))
+      .scale(colorScale)
+      .title('Homeless Population:')
+      .titleWidth(200)
+      .cells(thresholds.length) // Set number of cells in legend
+      .labels(labels); // Set custom labels for legend
 
-
-      chart.select('.legendQuant').call(legendQuant);
-    });
+    // Append legend to the chart
+    chart
+      .select('.legendQuant')
+      .call(legendQuant);
   });
+});
+
+//   const mapWidth = 1400;
+//   const mapHeight = 700;
+//   const mapmargin = {
+//     top: 100,
+//     right: 100,
+//     bottom: 50,
+//     left: 200,
+//   };
+//   const mapwidth =
+//     mapWidth - mapmargin.left - mapmargin.right;
+//   const mapheight =
+//     mapHeight - mapmargin.top - mapmargin.bottom;
+
+//   var projection = d3
+//     .geoAlbersUsa()
+//     .translate([mapwidth / 2 - 200, mapheight / 2])
+//     .scale([1250]);
+//   var path = d3.geoPath().projection(projection);
+
+//   // Creating the svg element
+//   const mapsvg = d3
+//     .select('#choropleth_map')
+//     .append('svg')
+//     .attr('width', mapWidth)
+//     .attr('height', mapHeight);
+
+//   // Creating the Chart
+//   const chart = mapsvg
+//     .append('g')
+//     .attr(
+//       'transform',
+//       `translate(${mapmargin.left},${mapmargin.top})`,
+//     );
+
+//   // Tooltip
+//   const maptooltip = d3
+//     .select('body')
+//     .append('div')
+//     .attr('class', 'maptooltip')
+//     .style('opacity', 0)
+//     .style('position', 'absolute')
+//     .style('text-align', 'center')
+//     .style('padding', '5px')
+//     .style('font-size', '12.5px')
+//     .style('background', 'rgb(231, 231, 229)')
+//     .style('border', '0px')
+//     .style('border-radius', '6px')
+//     .style('pointer-events', 'none');
+
+//   // Add title
+//   chart
+//     .append('text')
+//     .attr('class', 'Title')
+//     .attr('x', -100)
+//     .attr('y', -60)
+//     .attr('fill', 'black')
+//     .text(
+//       'California and New York had extremely high homeless population',
+//     )
+//     .style('font-size', '35px');
+
+//   // Subtitle of graph
+//   chart
+//     .append('text')
+//     .attr('x', -100)
+//     .attr('y', -30)
+//     .attr('text-anchor', 'left')
+//     .style('font-size', '20px')
+//     .style('fill', 'grey')
+//     .text(
+//       'Homelessness Distribution',
+//     );
+
+//   d3.csv(
+//     'https://gist.githubusercontent.com/eunicetu16/dfa96a1c1723bdf0d60bc6d1449fcf3e/raw/abe6d3f353d620eb0808545aed1660a8f2a3616f/2013_homelesspop.csv',
+//     function (d) {
+//       return {
+//         state: d.State,
+//         homeless: +d.Total_Homeless_Persons,
+//       };
+//     },
+//   ).then(function (data) {
+//     var colorScale = d3
+//       .scaleThreshold()
+//       .domain([
+//         3000, 5000, 7000, 9000, 10000, 30000, 50000,
+//         100000, 150000,
+//       ])
+//       .range(d3.schemeBlues[9]);
+
+
+//     d3.json(
+//       'https://gist.githubusercontent.com/eunicetu16/7d60c3fb3c6951e39c46261769395b23/raw/bb15b94c838154bd6b2285b24eece70125ee11d3/us-states.json',
+//     ).then(function (json) {
+//       for (var i = 0; i < data.length; i++) {
+//         //state name
+//         var dataState = data[i].state;
+//         var homelessdata = data[i].homeless;
+
+//         for (var j = 0; j < json.features.length; j++) {
+//           var jsonState =
+//             json.features[j].properties.name;
+//           if (dataState == jsonState) {
+//             json.features[j].properties.value =
+//               homelessdata;
+//             break;
+//           }
+//         }
+//       }
+
+//        // Bind data and create one path per GeoJSON feature
+//       chart
+//         .selectAll('path')
+//         .data(json.features)
+//         .enter()
+//         .append('path')
+//         .attr('d', path)
+//         .style('fill', function (d) {
+//           var value = d.properties.value;
+//           if (value) {
+//             return colorScale(value);
+//           } else {
+//             return '#CCC';
+//           }
+//         })
+//         .style('stroke', 'black')
+
+//         .on('mouseover', function (event, d) {
+//     maptooltip
+//         .transition()
+//         .duration(200)
+//         .style('opacity', 0.85);
+//     maptooltip
+//         .html(
+//             d.properties.name +
+//             '<br/>' +
+//             'Homeless Population: ' +
+//             d.properties.value.toLocaleString(), // Format number with commas
+//         )
+//         .style('left', event.pageX + 10 + 'px')
+//         .style('top', event.pageY - 60 + 'px');
+// })
+//         .on('mouseout', function (event, d) {
+//           maptooltip
+//             .transition()
+//             .duration(500)
+//             .style('opacity', 0);
+//         });
+
+//       chart
+//         .append('g')
+//         .attr('class', 'legendQuant')
+//         .attr('transform', `translate(900, 0)`);
+
+
+//       var legendQuant = d3
+//         .legendColor()
+//         .shapeWidth(30)
+//         .orient('vertical')
+//         .labelFormat(d3.format('.0f'))
+//         .scale(colorScale)
+//         .title('Homeless Population:')
+//         .titleWidth(200);
+
+
+//       chart.select('.legendQuant').call(legendQuant);
+//     });
+//   });
 
     </script>
   </body>
@@ -665,14 +833,9 @@ d3.csv(heatmapUrl, function (d) {
     .style('font-size', '15px');
 
   //Build color scale
-  const theresholdScale = d3
-    .scaleThreshold(d3.interpolateBlues)
-    .domain([10, 30, 50, 70, 90])
-    .range(
-      d3.range(5).map(function (i) {
-        return d3.interpolateBlues(i / 5);
-      }),
-    );
+  const colorScale = d3
+    .scaleSequential(d3.interpolateBlues)
+    .domain([0, d3.max(data, (d) => +d.percent)]);
 
   heatmap
     .append('g')
@@ -684,8 +847,10 @@ d3.csv(heatmapUrl, function (d) {
     .shapeWidth(60)
     .orient('horizontal')
     .labelFormat(d3.format('.0f'))
-    .scale(theresholdScale)
-    .title('% Homeless Population:');
+    .scale(colorScale)
+    .title('% Homeless Population:')
+    .cells(5) // Specify the number of cells (colors) in the legend
+    .labels(["0-10", "10-30", "30-50", "50-70", "70-90"]); // Labels for each cell
 
   heatmap
     .select('.legendSequential')
@@ -695,9 +860,7 @@ d3.csv(heatmapUrl, function (d) {
     .selectAll('.legendTitle')
     .attr('font-size', '18px');
 
-  const colorScale = d3
-    .scaleSequential(d3.interpolateBlues)
-    .domain([0, d3.max(data, (d) => +d.percent)]);
+  
 
   const tooltip = d3
     .select('body')
