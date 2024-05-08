@@ -680,7 +680,7 @@ d3.csv(heatmapUrl, function (d) {
     .labelFormat(d3.format('.0f'))
     .scale(colorScale)
     .title('% Homeless Population:')
-    .cells(5) // Specify the number of cells (colors) in the legend
+    .cells(5) 
     .labels(["0-10", "10-30", "30-50", "50-70", "70-90"]); // Labels for each cell
 
   heatmap
@@ -750,7 +750,7 @@ heatmap
   .attr('x', -100)
   .attr('y', -60)
   .style('font-size', '35px')
-  .text('Heatmap of percent homeless population for each variable');
+  .text('The majority of homeless population are UNSHELTED PERSONS');
 
 heatmap
   .append('text')
@@ -818,7 +818,7 @@ heatmap
     .append('text')
     .attr('x', -50)
     .attr('y', -50)
-    .text('Homelessness Population Change Across different States')
+    .text('North Dakota had a significant increase in homeless population')
     .style('font-size', '35px');
 
   bar
